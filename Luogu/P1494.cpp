@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 const int MaxN = 5e4 + 5;
@@ -32,12 +33,34 @@ class question
     int block_l, block_r;
     friend bool operator<(const question &__x, const question &__y)
     {
+        if (__x.block_l != __y.block_l)
+        {
+            return __x.l < __y.l;
+        }
+        else
+        {
+            if (__x.block_l % 2 == 1)
+            {
+                return __x.r < __y.r;
+            }
+            else
+            {
+                return __x.r > __y.r;
+            }
+        }
     }
     void format()
     {
-        int gcd = __gcd(up, down);
-        up /= gcd;
-        down /= gcd;
+        if (up == 0)
+        {
+            down = 1;
+        }
+        else
+        {
+            int gcd = __gcd(up, down);
+            up /= gcd;
+            down /= gcd;
+        }
     }
 };
 int n, m;
@@ -63,6 +86,22 @@ int main()
         ask[i].block_r = r / block + 1;
         ask[i].up = 0;
         ask[i].down = 1;
+    }
+    std::sort(ask + 1, ask + 1 + n);
+    int l, r;
+    l = 1;
+    r = 0;
+    int up, down;
+    up = 0;
+    down = 1;
+    for (int i = 1; i <= m; i++)
+    {
+        if (ask[i].l==ask[i].r)
+        {
+            ask[i].up = 0;
+            ask[i].down = 1;
+            continue;
+        }
     }
     return 0;
 }
