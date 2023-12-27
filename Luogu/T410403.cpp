@@ -12,7 +12,7 @@ int main()
     {
         scanf("%d", &p[i]);
     }
-    std::sort(p + 1, p + 1 + n);
+    std::sort(p + 1, p + 1 + n, [](const int &__x, const int &__y) { return __x > __y; });
     for (int i = 1; i <= n; i++)
     {
         int to = -1;
@@ -21,8 +21,19 @@ int main()
             if (desk[j] + p[i] <= m)
             {
                 to = j;
+                break;
             }
         }
+        if (to == -1)
+        {
+            desk.push_back(p[i]);
+        }
+        else
+        {
+            desk[to] += p[i];
+        }
+        std::sort(desk.begin(), desk.end(), [](const int &__x, const int &__y) { return __x > __y; });
     }
+    printf("%d\n", (int)(desk.size()));
     return 0;
 }
