@@ -45,9 +45,7 @@ void solve()
                     break;
                 }
             }
-            int tmp = *set.begin();
-            set.erase(set.find(tmp));
-            set.insert(tmp + k - i + 1);
+            set.erase(set.find(*set.begin()));
         }
         if (!accept)
         {
