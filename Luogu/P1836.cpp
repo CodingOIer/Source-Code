@@ -13,7 +13,7 @@ long long get_sum(int x)
 }
 int main()
 {
-    scanf("%*d%d", &n);
+    scanf("%d", &n);
     long long tmp = 0;
     for (int i = 1; i <= 999999; i++)
     {
