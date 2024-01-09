@@ -12,6 +12,7 @@
                 "${workspaceFolder}\\.Build\\${fileBasenameNoExtension}.exe",
                 "-std=c++20",
                 "-Wall",
+                "-DLOCAL"
             ],
             "options": {
                 "cwd": "${fileDirname}"
