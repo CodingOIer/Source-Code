@@ -52,6 +52,7 @@ class node
     }
     void update()
     {
+        downstream();
         max = std::max({(left != nullptr ? left->max : 0), (right != nullptr ? right->max : 0), val});
         size = (left != nullptr ? left->size : 0) + (right != nullptr ? right->size : 0) + 1;
     }
