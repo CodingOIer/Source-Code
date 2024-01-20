@@ -4,18 +4,17 @@ constexpr int MaxN = 1e3 + 5;
 int t;
 int n;
 char s[MaxN];
-void solve()
+char p[MaxN];
+char res[MaxN];
+int find(char *s, char *t)
 {
-    scanf("%d", &n);
-    scanf("%s", s + 1);
-    char *to = "abacaba";
-    int cnt = 0;
-    for (int j = 1; j <= n - 6; j++)
+    int res = 0;
+    for (int i = 1; i <= n - 6; i++)
     {
         bool accept = true;
-        for (int k = 0; k < 7; k++)
+        for (int j = 0; j < 7; j++)
         {
-            if (s[j + k] != to[k])
+            if (s[i + j] != t[j])
             {
                 accept = false;
                 break;
@@ -23,10 +22,52 @@ void solve()
         }
         if (accept)
         {
-            cnt++;
+            res++;
         }
     }
-    if (cnt == 1)
+    return res;
+}
+char *check(int w, char *t)
+{
+    strcpy(p + 1, s + 1);
+    for (int i = 1; i < w; i++)
+    {
+        if (p[i] == '?')
+        {
+            p[i] = 'd';
+        }
+    }
+    for (int i = 0; i < 7; i++)
+    {
+        if (p[w + i] != t[i] && p[w + i] != '?')
+        {
+            return "WA";
+        }
+        p[w + i] = t[i];
+    }
+    for (int i = w + 7; i <= n; i++)
+    {
+        if (p[i] == '?')
+        {
+            p[i] = 'd';
+        }
+    }
+    if (find(p, t) == 1)
+    {
+        return p + 1;
+    }
+    else
+    {
+        return "WA";
+    }
+}
+void solve()
+{
+    scanf("%d", &n);
+    scanf("%s", s + 1);
+    char *to = "abacaba";
+    int res_cnt = find(s, to);
+    if (res_cnt == 1)
     {
         for (int i = 1; i <= n; i++)
         {
@@ -39,40 +80,18 @@ void solve()
         printf("%s\n", s + 1);
         return;
     }
-    if (cnt >= 2)
+    if (res_cnt >= 2)
     {
         printf("No\n");
         return;
     }
     for (int i = 1; i <= n - 6; i++)
     {
-        bool accept = true;
-        for (int j = 0; j < 7; j++)
-        {
-            if (!(s[i + j] == to[j] || s[i + j] == '?'))
-            {
-                accept = false;
-                break;
-            }
-        }
-        if (accept)
+        strcpy(res + 1, check(i, to));
+        if (strcmp(res + 1, "WA") != 0)
         {
             printf("Yes\n");
-            for (int j = 1; j <= n; j++)
-            {
-                if (i <= j && j <= i + 6)
-                {
-                    s[j] = to[j - i];
-                }
-                else
-                {
-                    if (s[j] == '?')
-                    {
-                        s[j] = 'd';
-                    }
-                }
-            }
-            printf("%s\n", s + 1);
+            printf("%s\n", res + 1);
             return;
         }
     }
@@ -81,7 +100,6 @@ void solve()
 }
 int main()
 {
-    freopen("CF1379A.out", "w", stdout);
     scanf("%d", &t);
     for (int i = 1; i <= t; i++)
     {
