@@ -2,7 +2,11 @@
 int n, k;
 int dfs(int n, int k)
 {
-    if (n == 0 || k == 0)
+    if (k == 0)
+    {
+        return 0;
+    }
+    else if (n == 0 || k == 1)
     {
         return 1;
     }
@@ -21,6 +25,6 @@ int dfs(int n, int k)
 int main()
 {
     scanf("%d%d", &n, &k);
-    printf("%d", dfs(n, k));
+    printf("%d", dfs(n, k) / 2);
     return 0;
 }
