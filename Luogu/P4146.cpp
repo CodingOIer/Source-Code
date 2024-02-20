@@ -1,141 +1,91 @@
 #include <algorithm>
 #include <cstdio>
 #include <random>
+#include <tuple>
 std::mt19937 rnd(std::random_device{}());
-constexpr int MaxN = 5e4 + 5;
-int p[MaxN];
 class node
 {
   public:
-    int val;
+    int x;
     int key;
-    int max;
-    int prio;
     int size;
-    int lazy_add;
-    bool lazy_upturn;
+    int add_lazy;
+    bool rev_lazy;
     node *left, *right;
-    node(int x)
+    node(int k)
     {
-        val = 0;
-        key = x;
-        max = 0;
-        prio = rnd();
-        size = 1;
-        lazy_add = 0;
-        lazy_upturn = false;
+        x = k;
+        key = rnd();
+        add_lazy = 0;
+        rev_lazy = 0;
+        left = nullptr;
+        right = nullptr;
+    }
+    node()
+    {
+        x = 0;
+        key = rnd();
+        add_lazy = 0;
+        rev_lazy = 0;
         left = nullptr;
         right = nullptr;
     }
     void downstream()
     {
-        if (lazy_upturn)
+        if (rev_lazy)
         {
             std::swap(left, right);
         }
         if (left != nullptr)
         {
-            left->val += lazy_add;
-            left->max += lazy_add;
-            left->lazy_add += lazy_add;
-            left->lazy_upturn ^= lazy_upturn;
+            left->rev_lazy ^= rev_lazy;
+            left->x += add_lazy;
+            left->add_lazy += add_lazy;
         }
         if (right != nullptr)
         {
-            right->val += lazy_add;
-            right->max += lazy_add;
-            right->lazy_add += lazy_add;
-            right->lazy_upturn ^= lazy_upturn;
+            right->rev_lazy ^= rev_lazy;
+            right->x += add_lazy;
+            right->add_lazy += add_lazy;
         }
-        lazy_add = 0;
-        lazy_upturn = false;
+        add_lazy = 0;
+        rev_lazy = 0;
     }
-    void update()
+    void updateSize()
     {
-        downstream();
-        max = std::max({(left != nullptr ? left->max : 0), (right != nullptr ? right->max : 0), val});
-        size = (left != nullptr ? left->size : 0) + (right != nullptr ? right->size : 0) + 1;
+        size = (left == nullptr ? 0 : left->size) + (right == nullptr ? 0 : right->size) + 1;
     }
 };
-node *root;
-node *dfsBuild(node *cur, node *x, node *fa)
-{
-    if (cur == nullptr)
-    {
-        fa->right = x;
-        x->update();
-        cur = x;
-    }
-    else if (cur->prio > x->prio)
-    {
-        if (fa != nullptr)
-        {
-            fa->right = x;
-        }
-        x->left = cur;
-        x->update();
-        cur = x;
-    }
-    else
-    {
-        dfsBuild(cur->right, x, cur);
-        cur->update();
-    }
-    return cur;
-}
-void build(int n)
-{
-    root = new node(1);
-    for (int i = 2; i <= n; i++)
-    {
-        node *temp = new node(i);
-        root = dfsBuild(root, temp, nullptr);
-    }
-}
-void output(node *cur)
-{
-    if (cur == nullptr)
-    {
-        return;
-    }
-    output(cur->left);
-    printf("%d ", cur->key);
-    output(cur->right);
-}
 std::pair<node *, node *> splitRank(node *cur, int rank)
 {
     if (cur == nullptr)
     {
         return {nullptr, nullptr};
     }
-    cur->downstream();
-    int left_son_size = cur->left != nullptr ? cur->left->size : 0;
+    int left_son_size = (cur->left == nullptr ? 0 : cur->left->size);
     if (rank <= left_son_size)
     {
-        node *l, *r;
         auto temp = splitRank(cur->left, rank);
-        l = temp.first;
-        r = temp.second;
-        cur->left = r;
-        cur->update();
-        return {l, cur};
+        cur->left = temp.second;
+        cur->updateSize();
+        temp.first->updateSize();
+        return {temp.first, cur};
     }
     else if (rank == left_son_size + 1)
     {
-        node *r = cur->right;
+        node *temp = cur->right;
         cur->right = nullptr;
-        cur->update();
-        return {cur, r};
+        cur->updateSize();
+        temp->updateSize();
+        return {cur, temp};
     }
     else
     {
-        node *l, *r;
         auto temp = splitRank(cur->right, rank - left_son_size - 1);
-        l = temp.first;
-        r = temp.second;
-        cur->right = l;
-        cur->update();
-        return {cur, r};
+        cur->right = temp.first;
+        cur->updateSize();
+        temp.second->updateSize();
+        return {cur, temp.second};
     }
 }
 node *merge(node *left, node *right)
@@ -144,70 +94,37 @@ node *merge(node *left, node *right)
     {
         return nullptr;
     }
-    else if (left == nullptr)
+    if (left == nullptr)
     {
         return right;
     }
-    else if (right == nullptr)
+    if (right == nullptr)
     {
         return left;
     }
-    left->downstream();
-    right->downstream();
-    if (left->prio < right->prio)
+    if (left->key < right->key)
     {
         left->right = merge(left->right, right);
-        left->update();
+        left->updateSize();
         return left;
     }
     else
     {
         right->left = merge(left, right->left);
-        right->update();
+        right->updateSize();
         return right;
     }
 }
 int n, m;
+node *root;
 int main()
 {
     scanf("%d%d", &n, &m);
-    build(n);
-    for (int i = 1; i <= m; i++)
+    root = new node(0);
+    for (int i = 2; i <= n; i++)
     {
-        int op;
-        scanf("%d", &op);
-        switch (op)
-        {
-        case 1: {
-            int x, y, v;
-            scanf("%d%d%d", &x, &y, &v);
-            auto temp1 = splitRank(root, y);
-            auto temp2 = splitRank(temp1.first, x - 1);
-            temp2.second->val += v;
-            temp2.second->max += v;
-            temp2.second->lazy_add += v;
-            root = merge(merge(temp2.first, temp2.second), temp1.second);
-            break;
-        }
-        case 2: {
-            int x, y;
-            scanf("%d%d", &x, &y);
-            auto temp1 = splitRank(root, y);
-            auto temp2 = splitRank(temp1.first, x - 1);
-            temp2.second->lazy_upturn ^= 1;
-            root = merge(merge(temp2.first, temp2.second), temp1.second);
-            break;
-        }
-        case 3: {
-            int x, y;
-            scanf("%d%d", &x, &y);
-            auto temp1 = splitRank(root, y);
-            auto temp2 = splitRank(temp1.first, x - 1);
-            printf("%d\n", temp2.second->max);
-            root = merge(merge(temp2.first, temp2.second), temp1.second);
-            break;
-        }
-        }
+        node *k = new node(0);
+        root = merge(root, k);
     }
     return 0;
 }
