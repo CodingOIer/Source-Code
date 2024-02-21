@@ -1,41 +1,29 @@
-/**
- * @Author: CodingOIer redefinition0726@163.com
- * @Date: 2024-02-01 17:24:17
- * @LastEditors: CodingOIer redefinition0726@163.com
- * @LastEditTime: 2024-02-01 17:32:48
- * @FilePath: \Source-Code\Luogu\P1697.cpp
- * @
- * @Copyright (c) 2024 by CodingOIer, All Rights Reserved.
- */
-#include <algorithm>
 #include <cstdio>
+#include <cstring>
 constexpr int MaxN = 1e2 + 5;
 constexpr int MaxM = 1e3 + 5;
 int n;
 int l[MaxN];
 int r[MaxN];
-bool vis[MaxN];
-int calc(int but)
+bool f[MaxM];
+int calc(int id)
 {
-    for (int i = 0; i <= 1000; i++)
-    {
-        vis[i] = false;
-    }
+    memset(f, 0, sizeof(f));
     for (int i = 1; i <= n; i++)
     {
-        if (i == but)
+        if (i == id)
         {
             continue;
         }
-        for (int j = l[i]; j <= r[i]; j++)
+        for (int j = l[i]; j < r[i]; j++)
         {
-            vis[j] = true;
+            f[j] = true;
         }
     }
     int res = 0;
     for (int i = 0; i <= 1000; i++)
     {
-        res += vis[i] ? 1 : 0;
+        res += f[i] ? 1 : 0;
     }
     return res;
 }
@@ -49,7 +37,8 @@ int main()
     int answer = -0x3f3f3f3f;
     for (int i = 1; i <= n; i++)
     {
-        answer = std::max(answer, calc(i));
+        int res = calc(i);
+        answer = res > answer ? res : answer;
     }
     printf("%d\n", answer);
     return 0;
