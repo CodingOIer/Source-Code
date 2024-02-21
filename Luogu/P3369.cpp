@@ -20,7 +20,7 @@ class node
         left = nullptr;
         right = nullptr;
     }
-    void updateSize()
+    void update()
     {
         size = (left != nullptr ? left->size : 0) + (right != nullptr ? right->size : 0) + count;
     }
@@ -36,14 +36,14 @@ std::pair<node *, node *> splitKey(node *cur, int key)
     {
         auto temp = splitKey(cur->left, key);
         cur->left = temp.second;
-        cur->updateSize();
+        cur->update();
         return {temp.first, cur};
     }
     else
     {
         auto temp = splitKey(cur->right, key);
         cur->right = temp.first;
-        cur->updateSize();
+        cur->update();
         return {cur, temp.second};
     }
 }
@@ -59,7 +59,7 @@ std::tuple<node *, node *, node *> splitRank(node *cur, int rank)
         node *l, *mid, *r;
         std::tie(l, mid, r) = splitRank(cur->left, rank);
         cur->left = r;
-        cur->updateSize();
+        cur->update();
         return {l, mid, cur};
     }
     else if (rank <= left_son_size + cur->count)
@@ -69,7 +69,7 @@ std::tuple<node *, node *, node *> splitRank(node *cur, int rank)
         r = cur->right;
         cur->left = nullptr;
         cur->right = nullptr;
-        cur->updateSize();
+        cur->update();
         return {l, cur, r};
     }
     else
@@ -77,7 +77,7 @@ std::tuple<node *, node *, node *> splitRank(node *cur, int rank)
         node *l, *mid, *r;
         std::tie(l, mid, r) = splitRank(cur->right, rank - left_son_size - cur->count);
         cur->right = l;
-        cur->updateSize();
+        cur->update();
         return {cur, mid, r};
     }
 }
@@ -98,13 +98,13 @@ node *merge(node *left, node *right)
     if (left->prio > right->prio)
     {
         left->right = merge(left->right, right);
-        left->updateSize();
+        left->update();
         return left;
     }
     else
     {
         right->left = merge(left, right->left);
-        right->updateSize();
+        right->update();
         return right;
     }
 }
@@ -115,7 +115,7 @@ void insert(int val)
     if (temp2.second != nullptr)
     {
         temp2.second->count++;
-        temp2.second->updateSize();
+        temp2.second->update();
         root = merge(merge(temp2.first, temp2.second), temp1.second);
     }
     else
