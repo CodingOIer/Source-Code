@@ -7,6 +7,7 @@ class node
 {
   public:
     int x;
+    int max;
     int key;
     int size;
     int add_lazy;
@@ -15,7 +16,9 @@ class node
     node(int k)
     {
         x = k;
+        max = k;
         key = rnd();
+        size = 1;
         add_lazy = 0;
         rev_lazy = 0;
         left = nullptr;
@@ -24,7 +27,9 @@ class node
     node()
     {
         x = 0;
+        max = 0;
         key = rnd();
+        size = 1;
         add_lazy = 0;
         rev_lazy = 0;
         left = nullptr;
@@ -51,40 +56,45 @@ class node
         add_lazy = 0;
         rev_lazy = 0;
     }
-    void updateSize()
+    void update()
     {
+        max = std::max({left == nullptr ? 0 : left->size, right == nullptr ? 0 : right->size, x});
         size = (left == nullptr ? 0 : left->size) + (right == nullptr ? 0 : right->size) + 1;
     }
 };
 std::pair<node *, node *> splitRank(node *cur, int rank)
 {
+    if (rank == 0)
+    {
+        return {nullptr, cur};
+    }
     if (cur == nullptr)
     {
         return {nullptr, nullptr};
     }
+    cur->downstream();
     int left_son_size = (cur->left == nullptr ? 0 : cur->left->size);
     if (rank <= left_son_size)
     {
         auto temp = splitRank(cur->left, rank);
         cur->left = temp.second;
-        cur->updateSize();
-        temp.first->updateSize();
+        cur->update();
+        temp.first->update();
         return {temp.first, cur};
     }
     else if (rank == left_son_size + 1)
     {
         node *temp = cur->right;
         cur->right = nullptr;
-        cur->updateSize();
-        temp->updateSize();
+        cur->update();
         return {cur, temp};
     }
     else
     {
         auto temp = splitRank(cur->right, rank - left_son_size - 1);
         cur->right = temp.first;
-        cur->updateSize();
-        temp.second->updateSize();
+        cur->update();
+        temp.second->update();
         return {cur, temp.second};
     }
 }
@@ -102,16 +112,18 @@ node *merge(node *left, node *right)
     {
         return left;
     }
+    left->downstream();
+    right->downstream();
     if (left->key < right->key)
     {
         left->right = merge(left->right, right);
-        left->updateSize();
+        left->update();
         return left;
     }
     else
     {
         right->left = merge(left, right->left);
-        right->updateSize();
+        right->update();
         return right;
     }
 }
@@ -125,6 +137,36 @@ int main()
     {
         node *k = new node(0);
         root = merge(root, k);
+    }
+    for (int i = 1; i <= m; i++)
+    {
+        int op, l, r;
+        scanf("%d%d%d", &op, &l, &r);
+        if (op == 1)
+        {
+            int v;
+            scanf("%d", &v);
+            auto temp1 = splitRank(root, r);
+            auto temp2 = splitRank(temp1.first, l - 1);
+            temp2.second->x += v;
+            temp2.second->max += v;
+            temp2.second->add_lazy += v;
+            root = merge(merge(temp2.first, temp2.second), temp1.second);
+        }
+        else if (op == 2)
+        {
+            auto temp1 = splitRank(root, r);
+            auto temp2 = splitRank(temp1.first, l - 1);
+            temp2.second->rev_lazy ^= 1;
+            root = merge(merge(temp2.first, temp2.second), temp1.second);
+        }
+        else if (op == 3)
+        {
+            auto temp1 = splitRank(root, r);
+            auto temp2 = splitRank(temp1.first, l - 1);
+            printf("%d\n", temp2.second->max);
+            root = merge(merge(temp2.first, temp2.second), temp1.second);
+        }
     }
     return 0;
 }
