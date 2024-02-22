@@ -20,7 +20,7 @@ class node
         key = rnd();
         size = 1;
         add_lazy = 0;
-        rev_lazy = 0;
+        rev_lazy = false;
         left = nullptr;
         right = nullptr;
     }
@@ -31,7 +31,7 @@ class node
         key = rnd();
         size = 1;
         add_lazy = 0;
-        rev_lazy = 0;
+        rev_lazy = false;
         left = nullptr;
         right = nullptr;
     }
@@ -41,33 +41,40 @@ class node
         {
             std::swap(left, right);
         }
+        if (rev_lazy)
+        {
+            if (left != nullptr)
+            {
+                left->rev_lazy ^= 1;
+            }
+            if (right != nullptr)
+            {
+                right->rev_lazy ^= 1;
+            }
+        }
+        rev_lazy = false;
         if (left != nullptr)
         {
-            left->rev_lazy ^= rev_lazy;
             left->x += add_lazy;
+            left->max += add_lazy;
             left->add_lazy += add_lazy;
         }
         if (right != nullptr)
         {
-            right->rev_lazy ^= rev_lazy;
             right->x += add_lazy;
+            right->max += add_lazy;
             right->add_lazy += add_lazy;
         }
         add_lazy = 0;
-        rev_lazy = 0;
     }
     void update()
     {
-        max = std::max({left == nullptr ? 0 : left->size, right == nullptr ? 0 : right->size, x});
+        max = std::max({left == nullptr ? 0 : left->max, right == nullptr ? 0 : right->max, x});
         size = (left == nullptr ? 0 : left->size) + (right == nullptr ? 0 : right->size) + 1;
     }
 };
 std::pair<node *, node *> splitRank(node *cur, int rank)
 {
-    if (rank == 0)
-    {
-        return {nullptr, cur};
-    }
     if (cur == nullptr)
     {
         return {nullptr, nullptr};
@@ -79,7 +86,6 @@ std::pair<node *, node *> splitRank(node *cur, int rank)
         auto temp = splitRank(cur->left, rank);
         cur->left = temp.second;
         cur->update();
-        temp.first->update();
         return {temp.first, cur};
     }
     else if (rank == left_son_size + 1)
@@ -94,7 +100,6 @@ std::pair<node *, node *> splitRank(node *cur, int rank)
         auto temp = splitRank(cur->right, rank - left_son_size - 1);
         cur->right = temp.first;
         cur->update();
-        temp.second->update();
         return {cur, temp.second};
     }
 }
@@ -129,6 +134,29 @@ node *merge(node *left, node *right)
 }
 int n, m;
 node *root;
+void add(int l, int r, int v)
+{
+    auto temp1 = splitRank(root, l - 1);
+    auto temp2 = splitRank(temp1.second, r - l + 1);
+    temp2.first->x += v;
+    temp2.first->max += v;
+    temp2.first->add_lazy += v;
+    root = merge(merge(temp1.first, temp2.first), temp2.second);
+}
+void reversal(int l, int r)
+{
+    auto temp1 = splitRank(root, l - 1);
+    auto temp2 = splitRank(temp1.second, r - l + 1);
+    temp2.first->rev_lazy ^= 1;
+    root = merge(merge(temp1.first, temp2.first), temp2.second);
+}
+void query(int l, int r)
+{
+    auto temp1 = splitRank(root, l - 1);
+    auto temp2 = splitRank(temp1.second, r - l + 1);
+    printf("%d\n", temp2.first->max);
+    root = merge(merge(temp1.first, temp2.first), temp2.second);
+}
 int main()
 {
     scanf("%d%d", &n, &m);
@@ -146,26 +174,15 @@ int main()
         {
             int v;
             scanf("%d", &v);
-            auto temp1 = splitRank(root, r);
-            auto temp2 = splitRank(temp1.first, l - 1);
-            temp2.second->x += v;
-            temp2.second->max += v;
-            temp2.second->add_lazy += v;
-            root = merge(merge(temp2.first, temp2.second), temp1.second);
+            add(l, r, v);
         }
         else if (op == 2)
         {
-            auto temp1 = splitRank(root, r);
-            auto temp2 = splitRank(temp1.first, l - 1);
-            temp2.second->rev_lazy ^= 1;
-            root = merge(merge(temp2.first, temp2.second), temp1.second);
+            reversal(l, r);
         }
         else if (op == 3)
         {
-            auto temp1 = splitRank(root, r);
-            auto temp2 = splitRank(temp1.first, l - 1);
-            printf("%d\n", temp2.second->max);
-            root = merge(merge(temp2.first, temp2.second), temp1.second);
+            query(l, r);
         }
     }
     return 0;
