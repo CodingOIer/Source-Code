@@ -93,5 +93,6 @@
         "variant": "cpp",
         "readme": "cpp"
     },
-    "Codegeex.Explanation.LanguagePreference": "English"
+    "Codegeex.Explanation.LanguagePreference": "English",
+    "cph.general.saveLocation": ""
 }
