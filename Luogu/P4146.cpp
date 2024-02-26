@@ -57,7 +57,7 @@ class node
     }
     void update()
     {
-        max = std::max({left == nullptr ? 0 : left->max, right == nullptr ? 0 : right->max, value});
+        max = std::max({left == nullptr ? -0x3f3f3f3f : left->max, right == nullptr ? -0x3f3f3f3f : right->max, value});
         size = (left == nullptr ? 0 : left->size) + (right == nullptr ? 0 : right->size) + 1;
     }
 };

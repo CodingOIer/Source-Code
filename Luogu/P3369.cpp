@@ -6,63 +6,62 @@ std::mt19937 rnd(std::random_device{}());
 class node
 {
   public:
+    int x;
     int key;
-    int prio;
+    int cnt;
     int size;
-    int count;
     node *left, *right;
-    node(int val)
+    node(int k)
     {
-        key = val;
-        prio = rnd();
+        x = k;
+        key = rnd();
+        cnt = 1;
         size = 1;
-        count = 1;
         left = nullptr;
         right = nullptr;
     }
     void update()
     {
-        size = (left != nullptr ? left->size : 0) + (right != nullptr ? right->size : 0) + count;
+        size = (left == nullptr ? 0 : left->size) + (right == nullptr ? 0 : right->size) + cnt;
     }
 };
-node *root;
-std::pair<node *, node *> splitKey(node *cur, int key)
+std::pair<node *, node *> splitValue(node *cur, int val)
 {
     if (cur == nullptr)
     {
         return {nullptr, nullptr};
     }
-    if (key <= cur->key)
+    if (val < cur->x)
     {
-        auto temp = splitKey(cur->left, key);
+        auto temp = splitValue(cur->left, val);
         cur->left = temp.second;
         cur->update();
         return {temp.first, cur};
     }
     else
     {
-        auto temp = splitKey(cur->right, key);
+        auto temp = splitValue(cur->right, val);
         cur->right = temp.first;
         cur->update();
         return {cur, temp.second};
     }
 }
-std::tuple<node *, node *, node *> splitRank(node *cur, int rank)
+std::tuple<node *, node *, node *> splitRank(node *cur, int rk)
 {
     if (cur == nullptr)
     {
         return {nullptr, nullptr, nullptr};
     }
-    int left_son_size = cur->left != nullptr ? cur->left->size : 0;
-    if (rank <= left_son_size)
+    int left_son_size = (cur->left == nullptr ? 0 : cur->left->size);
+    if (rk <= left_son_size)
     {
-        node *l, *mid, *r;
-        std::tie(l, mid, r) = splitRank(cur->left, rank);
+        node *l, *m, *r;
+        std::tie(l, m, r) = splitRank(cur->left, rk);
         cur->left = r;
         cur->update();
-        return {l, mid, cur};
+        return {l, m, cur};
     }
-    else if (rank <= left_son_size + cur->count)
+    else if (rk <= left_son_size + cur->cnt)
     {
         node *l, *r;
         l = cur->left;
@@ -74,11 +73,11 @@ std::tuple<node *, node *, node *> splitRank(node *cur, int rank)
     }
     else
     {
-        node *l, *mid, *r;
-        std::tie(l, mid, r) = splitRank(cur->right, rank - left_son_size - cur->count);
+        node *l, *m, *r;
+        std::tie(l, m, r) = splitRank(cur->right, rk - left_son_size - cur->cnt);
         cur->right = l;
         cur->update();
-        return {cur, mid, r};
+        return {cur, m, r};
     }
 }
 node *merge(node *left, node *right)
@@ -87,15 +86,15 @@ node *merge(node *left, node *right)
     {
         return nullptr;
     }
-    else if (left == nullptr)
+    if (left == nullptr)
     {
         return right;
     }
-    else if (right == nullptr)
+    if (right == nullptr)
     {
         return left;
     }
-    if (left->prio > right->prio)
+    if (left->key < right->key)
     {
         left->right = merge(left->right, right);
         left->update();
@@ -108,72 +107,77 @@ node *merge(node *left, node *right)
         return right;
     }
 }
-void insert(int val)
+node *root;
+void insert(int x)
 {
-    auto temp1 = splitKey(root, val);
-    auto temp2 = splitKey(temp1.first, val - 1);
-    if (temp2.second != nullptr)
+    auto temp1 = splitValue(root, x);
+    auto temp2 = splitValue(temp1.first, x - 1);
+    if (temp2.second == nullptr)
     {
-        temp2.second->count++;
+        temp2.second = new node(x);
+    }
+    else
+    {
+        temp2.second->cnt++;
         temp2.second->update();
-        root = merge(merge(temp2.first, temp2.second), temp1.second);
+    }
+    root = merge(merge(temp2.first, temp2.second), temp1.second);
+}
+void remove(int x)
+{
+    auto temp1 = splitValue(root, x);
+    auto temp2 = splitValue(temp1.first, x - 1);
+    if (temp2.second->cnt > 1)
+    {
+        temp2.second->cnt--;
+        temp2.second->update();
     }
     else
     {
-        node *temp = new node(val);
-        root = merge(merge(temp2.first, temp), temp1.second);
+        if (temp2.second != nullptr)
+        {
+            delete temp2.second;
+        }
+        temp2.second = nullptr;
     }
+    root = merge(merge(temp2.first, temp2.second), temp1.second);
 }
-void remove(int val)
+int queryRank(int x)
 {
-    auto temp1 = splitKey(root, val);
-    auto temp2 = splitKey(temp1.first, val - 1);
-    temp2.second->count--;
-    if (temp2.second->count == 0)
-    {
-        delete temp2.second;
-        root = merge(merge(temp2.first, nullptr), temp1.second);
-    }
-    else
-    {
-        root = merge(merge(temp2.first, temp2.second), temp1.second);
-    }
-}
-int queryRank(node *cur, int val)
-{
-    auto temp = splitKey(cur, val - 1);
-    int res = (temp.first != nullptr ? temp.first->size : 0) + 1;
-    cur = merge(temp.first, temp.second);
-    return res;
-}
-int queryKey(node *cur, int rank)
-{
-    node *l, *mid, *r;
-    std::tie(l, mid, r) = splitRank(cur, rank);
-    int res = mid->key;
-    cur = merge(merge(l, mid), r);
-    return res;
-}
-int queryAfterMin(int val)
-{
-    auto temp = splitKey(root, val);
-    int res = queryKey(temp.second, 1);
+    auto temp = splitValue(root, x - 1);
+    int res = (temp.first == nullptr ? 0 : temp.first->size) + 1;
     root = merge(temp.first, temp.second);
     return res;
 }
-int queryBeforeMax(int val)
+int queryValue(node *root, int x)
 {
-    auto temp = splitKey(root, val - 1);
-    int res = queryKey(temp.first, temp.first->size);
+    node *l, *m, *r;
+    std::tie(l, m, r) = splitRank(root, x);
+    int res = m->x;
+    root = merge(merge(l, m), r);
+    return res;
+}
+int queryBeforeMax(int x)
+{
+    auto temp = splitValue(root, x - 1);
+    int res = queryValue(temp.first, temp.first->size);
     root = merge(temp.first, temp.second);
     return res;
 }
-int n, op, x;
+int queryAfterMin(int x)
+{
+    auto temp = splitValue(root, x);
+    int res = queryValue(temp.second, 1);
+    root = merge(temp.first, temp.second);
+    return res;
+}
+int n;
 int main()
 {
     scanf("%d", &n);
     for (int i = 1; i <= n; i++)
     {
+        int op, x;
         scanf("%d%d", &op, &x);
         switch (op)
         {
@@ -186,11 +190,11 @@ int main()
             break;
         }
         case 3: {
-            printf("%d\n", queryRank(root, x));
+            printf("%d\n", queryRank(x));
             break;
         }
         case 4: {
-            printf("%d\n", queryKey(root, x));
+            printf("%d\n", queryValue(root, x));
             break;
         }
         case 5: {
