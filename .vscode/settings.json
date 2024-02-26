@@ -94,5 +94,6 @@
         "readme": "cpp"
     },
     "Codegeex.Explanation.LanguagePreference": "English",
-    "cph.general.saveLocation": ""
+    "cph.general.saveLocation": "",
+    "C_Cpp.default.compilerPath": "C:\\mingw64\\bin\\g++.exe"
 }
