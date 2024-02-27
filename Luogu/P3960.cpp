@@ -6,7 +6,7 @@ constexpr int MaxN = 3e5 + 5;
 class node
 {
   public:
-    int l, r;
+    long long l, r;
     int key;
     int size;
     node *left, *right;
@@ -19,7 +19,7 @@ class node
         left = nullptr;
         right = nullptr;
     }
-    node(int x)
+    node(long long x)
     {
         l = x;
         r = x;
@@ -105,7 +105,7 @@ std::pair<node *, node *> split(node *cur, int x)
     }
     else
     {
-        auto temp = split(cur->right, x - left_son_size + cur->r - cur->l + 1);
+        auto temp = split(cur->right, x - (left_son_size + cur->r - cur->l + 1));
         cur->right = temp.first;
         cur->update();
         return {cur, temp.second};
@@ -117,14 +117,14 @@ node *last_row;
 int main()
 {
     scanf("%d%d%d", &n, &m, &q);
-    for (int i = 1; i <= n; i++)
+    for (long long i = 1; i <= n; i++)
     {
         line[i] = new node;
         line[i]->l = (i - 1) * m + 1;
         line[i]->r = i * m - 1;
         line[i]->update();
     }
-    for (int i = 1; i <= n; i++)
+    for (long long i = 1; i <= n; i++)
     {
         last_row = merge(last_row, new node(i * m));
     }
@@ -136,7 +136,7 @@ int main()
         {
             auto temp1 = split(last_row, x);
             auto temp2 = split(temp1.first, x - 1);
-            printf("%d\n", temp2.second->l);
+            printf("%lld\n", temp2.second->l);
             last_row = merge(merge(temp2.first, temp1.second), temp2.second);
         }
         else
@@ -145,7 +145,7 @@ int main()
             auto line_temp2 = split(line_temp1.first, y - 1);
             auto row_temp1 = split(last_row, x);
             auto row_temp2 = split(row_temp1.first, x - 1);
-            printf("%d\n", line_temp2.second->l);
+            printf("%lld\n", line_temp2.second->l);
             line[x] = merge(merge(line_temp2.first, line_temp1.second), row_temp2.second);
             last_row = merge(merge(row_temp2.first, row_temp1.second), line_temp2.second);
         }
