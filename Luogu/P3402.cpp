@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdio>
 constexpr int MaxN = 1e5 + 5;
 constexpr int MaxM = 2e5 + 5;
@@ -10,14 +11,14 @@ class node
     node()
     {
         x = 0;
-        size = 0;
+        size = 1;
         left = nullptr;
         right = nullptr;
     }
     node(int k)
     {
         x = k;
-        size = 0;
+        size = 1;
         left = nullptr;
         right = nullptr;
     }
@@ -53,11 +54,28 @@ int query(node *cur, int s, int t, int w)
         return query(cur->right, mid + 1, t, w);
     }
 }
-void change(node *cur, node *last, int s, int t, int w, int val)
+int querySize(node *cur, int s, int t, int w)
+{
+    if (s == t)
+    {
+        return cur->x;
+    }
+    int mid = (s + t) / 2;
+    if (w <= mid)
+    {
+        return query(cur->left, s, mid, w);
+    }
+    else
+    {
+        return query(cur->right, mid + 1, t, w);
+    }
+}
+void change(node *cur, node *last, int s, int t, int w, int val, int size)
 {
     if (s == t)
     {
         cur->x = val;
+        cur->size = size;
         return;
     }
     int mid = (s + t) / 2;
@@ -65,13 +83,13 @@ void change(node *cur, node *last, int s, int t, int w, int val)
     {
         cur->right = last->right;
         cur->left = new node;
-        change(cur->left, last->left, s, mid, w, val);
+        change(cur->left, last->left, s, mid, w, val, size);
     }
     else
     {
         cur->left = last->left;
         cur->right = new node;
-        change(cur->right, last->right, mid + 1, t, w, val);
+        change(cur->right, last->right, mid + 1, t, w, val, size);
     }
 }
 int find(int v, int x)
@@ -80,7 +98,15 @@ int find(int v, int x)
     {
         return x;
     }
-    return query(root[v], 1, n, x);
+    return find(v, query(root[v], 1, n, x));
+}
+int findSize(int v, int x)
+{
+    if (query(root[v], 1, n, x) == x)
+    {
+        return querySize(root[v], 1, n, x);
+    }
+    return find(v, query(root[v], 1, n, x));
 }
 int main()
 {
@@ -99,7 +125,17 @@ int main()
             int fx, fy;
             fx = find(i - 1, x);
             fy = find(i - 1, y);
-            change(root[i], root[i - 1], 1, n, fy, fx);
+            int sx, sy;
+            sx = findSize(i - 1, x);
+            sy = findSize(i - 1, y);
+            if (sx < sy)
+            {
+                change(root[i], root[i - 1], 1, n, fy, fx, sx);
+            }
+            else
+            {
+                change(root[i], root[i - 1], 1, n, fx, fy, sy);
+            }
         }
         else if (op == 2)
         {
@@ -120,8 +156,8 @@ int main()
             {
                 printf("0\n");
             }
-            root[i]->left = root[x]->left;
-            root[i]->right = root[x]->right;
+            root[i]->left = root[i - 1]->left;
+            root[i]->right = root[i - 1]->right;
         }
     }
     return 0;
