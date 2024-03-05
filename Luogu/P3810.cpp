@@ -24,7 +24,7 @@ node t[MaxN];
 node p[MaxN];
 bool cmpX(const node &__x, const node &__y)
 {
-    return __x.x < __y.x || ((__x.x == __y.x && __x.y < __y.y) || (__x.y == __y.y && __x.z < __y.z));
+    return __x.x < __y.x || (__x.x == __y.x && __x.y < __y.y) || (__x.x == __y.x && __x.y == __y.y && __x.z < __y.z);
 }
 bool cmpY(const node &__x, const node &__y)
 {
