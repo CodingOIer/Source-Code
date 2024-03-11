@@ -81,20 +81,26 @@ int query(int c, int s, int t, int l, int r)
 }
 void solve(int l, int r, std::vector<ask> &q)
 {
+    int mid = (l + r) / 2;
 }
 int main()
 {
     scanf("%d%d", &n, &m);
-    std::vector<ask> query;
+    std::vector<ask> q;
     for (int i = 1; i <= m; i++)
     {
         ask temp;
         scanf("%d%d%d%lld", &temp.op, &temp.l, &temp.r, &temp.x);
         temp.id = i;
         s[i] = temp.x;
-        query.push_back(temp);
+        q.push_back(temp);
     }
     std::sort(s + 1, s + 1 + m);
     sl = std::unique(s + 1, s + 1 + m) - s - 1;
+    for (auto &x : q)
+    {
+        x.x = link(x.x);
+    }
+    solve(1, sl, q);
     return 0;
 }
