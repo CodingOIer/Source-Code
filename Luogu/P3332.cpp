@@ -20,10 +20,10 @@ class ask
 };
 int sl;
 int n, m;
-int tree[MaxN * 4];
-int lazy[MaxN * 4];
 int answer[MaxN];
 long long s[MaxN];
+long long tree[MaxN * 4];
+long long lazy[MaxN * 4];
 inline int link(long long x)
 {
     return std::lower_bound(s + 1, s + 1 + sl, x) - s;
@@ -60,7 +60,7 @@ void change(int c, int s, int t, int l, int r, int v)
     }
     tree[c] = tree[c * 2] + tree[c * 2 + 1];
 }
-int query(int c, int s, int t, int l, int r)
+long long query(int c, int s, int t, int l, int r)
 {
     if (l <= s && t <= r)
     {
@@ -68,7 +68,7 @@ int query(int c, int s, int t, int l, int r)
     }
     downstream(c, s, t);
     int mid = (s + t) / 2;
-    int res = 0;
+    long long res = 0;
     if (l <= mid)
     {
         res += query(c * 2, s, mid, l, r);
@@ -94,77 +94,93 @@ void solve(int l, int r, std::vector<ask> &q)
         return;
     }
     int mid = (l + r) / 2;
-    for (auto x : q)
-    {
-        if (x.op == 1 && x.x > mid)
-        {
-            change(1, 1, n, x.l, x.r, 1);
-        }
-    }
+    bool lf, rf;
+    lf = false;
+    rf = false;
     std::vector<ask> left;
     std::vector<ask> right;
     for (auto x : q)
     {
         if (x.op == 1)
         {
-            if (x.x <= mid)
+            if (x.x > mid)
             {
-                left.push_back(x);
+                change(1, 1, n, x.l, x.r, 1);
+                right.push_back(x);
             }
             else
             {
-                right.push_back(x);
+                left.push_back(x);
             }
         }
-        if (x.op == 2)
+        else if (x.op == 2)
         {
             long long sum = query(1, 1, n, x.l, x.r);
             if (x.x <= sum)
             {
+                rf = true;
                 right.push_back(x);
             }
             else
             {
                 auto temp = x;
-                x.x -= sum;
+                temp.x -= sum;
+                lf = true;
                 left.push_back(temp);
             }
         }
     }
-    solve(mid + 1, r, left);
     for (auto x : q)
     {
-        if (x.op == 1 && x.x > mid)
+        if (x.op == 1)
         {
-            change(1, 1, n, x.l, x.r, -1);
+            if (x.x > mid)
+            {
+                change(1, 1, n, x.l, x.r, -1);
+            }
         }
     }
-    solve(l, mid - 1, right);
+    if (lf)
+    {
+        solve(l, mid, left);
+    }
+    if (rf)
+    {
+        solve(mid + 1, r, right);
+    }
 }
 int main()
 {
     scanf("%d%d", &n, &m);
     std::vector<ask> q;
+    int cnt = 0;
     for (int i = 1; i <= m; i++)
     {
         ask temp;
         scanf("%d%d%d%lld", &temp.op, &temp.l, &temp.r, &temp.x);
         temp.id = i;
-        s[i] = temp.x;
+        if (temp.op == 1)
+        {
+            cnt++;
+            s[cnt] = temp.x;
+        }
         q.push_back(temp);
     }
-    std::sort(s + 1, s + 1 + m);
-    sl = std::unique(s + 1, s + 1 + m) - s - 1;
+    std::sort(s + 1, s + 1 + cnt);
+    sl = std::unique(s + 1, s + 1 + cnt) - s - 1;
     for (auto &x : q)
     {
-        x.x = link(x.x);
+        if (x.op == 1)
+        {
+            x.x = link(x.x);
+        }
     }
     solve(1, sl, q);
     for (int i = 1; i <= m; i++)
     {
         if (q[i - 1].op == 2)
         {
-            printf("%d\n", answer[i]);
+            printf("%lld\n", s[answer[i]]);
         }
     }
     return 0;
