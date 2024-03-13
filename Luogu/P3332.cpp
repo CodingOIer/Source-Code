@@ -81,7 +81,65 @@ int query(int c, int s, int t, int l, int r)
 }
 void solve(int l, int r, std::vector<ask> &q)
 {
+    if (q.empty())
+    {
+        return;
+    }
+    if (l == r)
+    {
+        for (auto x : q)
+        {
+            answer[x.id] = l;
+        }
+        return;
+    }
     int mid = (l + r) / 2;
+    for (auto x : q)
+    {
+        if (x.op == 1 && x.x > mid)
+        {
+            change(1, 1, n, x.l, x.r, 1);
+        }
+    }
+    std::vector<ask> left;
+    std::vector<ask> right;
+    for (auto x : q)
+    {
+        if (x.op == 1)
+        {
+            if (x.x <= mid)
+            {
+                left.push_back(x);
+            }
+            else
+            {
+                right.push_back(x);
+            }
+        }
+        if (x.op == 2)
+        {
+            long long sum = query(1, 1, n, x.l, x.r);
+            if (x.x <= sum)
+            {
+                right.push_back(x);
+            }
+            else
+            {
+                auto temp = x;
+                x.x -= sum;
+                left.push_back(temp);
+            }
+        }
+    }
+    solve(mid + 1, r, left);
+    for (auto x : q)
+    {
+        if (x.op == 1 && x.x > mid)
+        {
+            change(1, 1, n, x.l, x.r, -1);
+        }
+    }
+    solve(l, mid - 1, right);
 }
 int main()
 {
@@ -102,5 +160,12 @@ int main()
         x.x = link(x.x);
     }
     solve(1, sl, q);
+    for (int i = 1; i <= m; i++)
+    {
+        if (q[i - 1].op == 2)
+        {
+            printf("%d\n", answer[i]);
+        }
+    }
     return 0;
 }
