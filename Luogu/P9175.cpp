@@ -1,73 +1,88 @@
-#include <algorithm>
 #include <cstdio>
-#include <queue>
-#include <tuple>
 #include <vector>
 constexpr int MaxN = 1e5 + 5;
+class rim
+{
+  public:
+    int to;
+    int v, s;
+    long long c;
+    rim()
+    {
+        v = 0;
+        s = 0;
+        c = 0;
+        to = 0;
+    }
+};
 class node
 {
   public:
-    int v, c, s;
+    long long x;
+    node *left, *right;
     node()
     {
-        v = 0;
-        c = 0;
-        s = 0;
-    }
-    friend bool operator<(const node &__x, const node &__y)
-    {
-        return __x.v < __y.v || (__x.v == __y.v && __x.s > __y.s);
+        x = 0;
+        left = nullptr;
+        right = nullptr;
     }
 };
-int n, q;
-std::vector<node> queue;
-std::vector<std::tuple<int, int, int, int>> link[MaxN];
-bool dfs(int x, int e, int fa)
+int n;
+int cnt;
+node *root[MaxN];
+std::vector<rim> link[MaxN];
+void build(node *cur, int s, int t)
 {
-    if (x == e)
+    if (s == t)
     {
-        return true;
+        return;
     }
-    for (auto k : link[x])
+    int mid = (s + t) / 2;
+    cur->left = new node;
+    cur->right = new node;
+    build(cur->left, s, mid);
+    build(cur->right, mid + 1, t);
+}
+void change(node *cur, node *last, int s, int t, int w, long long val)
+{
+    if (s == t)
     {
-        int to, v, c, s;
-        std::tie(to, v, c, s) = k;
-        if (to == fa)
+        cur->x = val;
+        return;
+    }
+    int mid = (s + t) / 2;
+    if (w <= mid)
+    {
+        cur->right = last->right;
+        cur->left = new node;
+        change(cur->left, last->left, s, mid, w, val);
+    }
+    else
+    {
+        cur->left = last->left;
+        cur->right = new node;
+        change(cur->right, last->right, mid + 1, t, w, val);
+    }
+    cur->x = cur->left->x + cur->right->x;
+}
+inline void change(int x, int y, int w, long long val)
+{
+    change(root[x], root[y], 1, n, w, val);
+}
+void dfsInfo(int x, int fa)
+{
+}
+void dfs(int x, int fa)
+{
+    for (auto next : link[x])
+    {
+        if (next.to == fa)
         {
             continue;
         }
-        node temp;
-        temp.v = v;
-        temp.c = c;
-        temp.s = s;
-        queue.push_back(temp);
-        if (dfs(to, e, x))
-        {
-            return true;
-        }
-        queue.pop_back();
+        change(next.to, x, next.v, next.c);
+        dfs(next.to, x);
     }
-    return false;
-}
-int solve(int x, int y, long long m)
-{
-    dfs(x, y, 0);
-    std::sort(queue.begin(), queue.end());
-    int min = 0x3f3f3f3f;
-    for (auto x : queue)
-    {
-        if (m >= x.c)
-        {
-            m -= x.c;
-            min = std::min(min, x.s);
-        }
-        else
-        {
-            min = std::min(min, x.v);
-        }
-    }
-    queue.clear();
-    return min;
 }
 int main()
 {
@@ -76,16 +91,14 @@ int main()
     {
         int x, y, v, c, s;
         scanf("%d%d%d%d%d", &x, &y, &v, &c, &s);
-        link[x].push_back({y, v, c, s});
-        link[y].push_back({x, v, c, s});
-    }
-    scanf("%d", &q);
-    for (int i = 1; i <= q; i++)
-    {
-        int a, b;
-        long long e;
-        scanf("%d%d%lld", &a, &b, &e);
-        printf("%d\n", solve(a, b, e));
+        rim temp;
+        temp.to = y;
+        temp.v = v;
+        temp.s = s;
+        temp.c = c;
+        link[x].push_back(temp);
+        temp.to = x;
+        link[y].push_back(temp);
     }
     return 0;
 }
