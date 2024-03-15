@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <vector>
-constexpr int MaxN = 1e5 + 5;
+constexpr int MaxN = 1e2 + 5;
 class rim
 {
   public:
@@ -299,17 +299,9 @@ int main()
         scanf("%d%d%lld", &x, &y, &want);
         int l, r;
         l = 1;
-        r = 0x3f3f3f3f;
-        int lca = LCA(x, y);
-        if (x != lca)
-        {
-            r = std::min(r, query(fa[x], lca));
-        }
-        if (y != lca)
-        {
-            r = std::min(r, query(fa[y], lca));
-        }
+        r = query(x, y);
         int res = -1;
+        int lca = LCA(x, y);
         for (; l <= r;)
         {
             int mid = (l + r) / 2;
