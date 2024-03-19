@@ -1,94 +1,65 @@
 #include <cstdio>
-#include <cstring>
-long long l, r;
-long long left[15];
-long long right[15];
-void get_sum(long long *res, long long x, bool zero = false)
+long long x, y;
+long long once[15];
+long long answer[15];
+void addOnce(long long x)
 {
-    for (long long i = 0; i < 15; i++)
+    for (int i = 1; i <= 6; i++)
     {
-        res[i] = 0;
-    }
-    long long cnt = 0;
-    for (; x != 0;)
-    {
-        res[x % 10]++;
+        once[x % 10]++;
         x /= 10;
-        cnt++;
-    }
-    if (zero)
-    {
-        res[0] += 2 - cnt;
     }
 }
-void add(long long *s, long long *t, long long val = 1)
+void addAnswer(long long x, long long cnt = 1)
 {
-    for (long long i = 0; i <= 9; i++)
+    for (; x != 0;)
     {
-        s[i] += t[i] * val;
+        answer[x % 10] += cnt;
+        x /= 10;
     }
+}
+void print()
+{
+    for (int i = 0; i <= 9; i++)
+    {
+        printf("%lld ", answer[i]);
+    }
+    printf("\n");
 }
 int main()
 {
-    scanf("%lld%lld", &l, &r);
-    l--;
-    long long tmp[15];
-    get_sum(tmp, 0);
-    long long res[15];
-    for (long long i = 0; i <= 99999; i++)
+    scanf("%lld%lld", &x, &y);
+    for (long long i = 0; i <= 999999; i++)
     {
-        get_sum(res, i, true);
-        add(tmp, res);
+        addOnce(i);
     }
-    long long now = 0;
-    for (long long i = 1;; i++)
+    for (; x % 1000000 != 0 && x <= y;)
     {
-        now = i * 100000 - 1;
-        if (now > l)
-        {
-            break;
-        }
-        add(left, tmp);
-        get_sum(res, i - 1);
-        add(left, res, 100000);
+        addAnswer(x);
+        x++;
     }
-    now -= 100000;
-    for (long long i = now + 1; i <= l; i++)
+    for (; y % 1000000 != 999999 && y >= x;)
     {
-        get_sum(res, i);
-        add(left, res);
+        addAnswer(y);
+        y--;
     }
-
-    now = 0;
-    for (long long i = 1;; i++)
+    if (x > y)
     {
-        now = i * 100000 - 1;
-        if (now > r)
-        {
-            break;
-        }
-        add(right, tmp);
-        get_sum(res, i - 1);
-        add(right, res, 100000);
+        print();
+        return 0;
     }
-    now -= 100000;
-    for (long long i = now + 1; i <= r; i++)
+    long long cnt = (y - x + 1) / 1000000;
+    for (int i = 0; i <= 9; i++)
     {
-        get_sum(res, i);
-        add(right, res);
+        answer[i] += cnt * once[i];
     }
-    /* if (l >= 100000)
+    x /= 1000000;
+    y /= 1000000;
+    for (; x <= y;)
     {
-        left[0] -= 11;
+        addAnswer(x, 1000000);
+        x++;
     }
-    if (r >= 100000)
-    {
-        right[0] -= 11;
-    } */
-    for (long long i = 0; i <= 9; i++)
-    {
-        printf("%lld ", right[i] - left[i]);
-    }
-    printf("\n");
+    print();
     return 0;
 }
