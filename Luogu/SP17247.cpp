@@ -1,13 +1,14 @@
 #include <cstdio>
-constexpr long long Once = 432000001;
+constexpr long long Sum1 = 2250000;
+constexpr long long Sum2 = 450000000000;
 int t;
 long long x, y;
 long long answer;
-void add(long long x)
+void add(long long x, long long cnt = 1)
 {
     for (; x != 0;)
     {
-        answer += x % 10;
+        answer += (x % 10) * cnt;
         x /= 10;
     }
 }
@@ -15,16 +16,12 @@ void solve()
 {
     answer = 0;
     scanf("%lld%lld", &x, &y);
-    if (x == 0)
-    {
-        x++;
-    }
-    for (; x % 100000000 != 0 && x <= y;)
+    for (; x % 100000 != 0 && x <= y;)
     {
         add(x);
         x++;
     }
-    for (; y % 100000000 != 99999999 && y >= x;)
+    for (; y % 100000 != 99999 && y >= x;)
     {
         add(y);
         y--;
@@ -34,13 +31,31 @@ void solve()
         printf("%lld\n", answer);
         return;
     }
-    long long cnt = (y - x + 1) / 100000000;
-    answer += cnt * Once;
-    x /= 100000000;
-    y /= 100000000;
+    x /= 100000;
+    y /= 100000;
+    for (; x % 100000 != 0 && x <= y;)
+    {
+        add(x, 100000);
+        answer += Sum1;
+        x++;
+    }
+    for (; y % 100000 != 99999 && y >= x;)
+    {
+        add(y, 100000);
+        answer += Sum1;
+        y--;
+    }
+    if (x > y)
+    {
+        printf("%lld\n", answer);
+        return;
+    }
+    x /= 100000;
+    y /= 100000;
     for (; x <= y;)
     {
-        add(x);
+        add(x, 10000000000LL);
+        answer += Sum2;
         x++;
     }
     printf("%lld\n", answer);
