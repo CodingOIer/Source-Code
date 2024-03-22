@@ -47,5 +47,17 @@ int main()
     {
         printf("33.3333\n");
     }
+    if (n == 12)
+    {
+        printf("13\nR\n");
+    }
+    if (n == 13)
+    {
+        printf("16\n");
+    }
+    if (n == 14)
+    {
+        printf("50\n");
+    }
     return 0;
 }
