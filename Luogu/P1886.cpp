@@ -24,7 +24,7 @@ typedef long long ll;
 const int inf = 0x3f3f3f3f;
 const int MaxN = 1e6 + 5;
 int n, k;
-int x, time;
+int x, index;
 int max[MaxN];
 int min[MaxN];
 std::priority_queue<std::pair<int, int>> queue_max;
