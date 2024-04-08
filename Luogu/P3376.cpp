@@ -1,45 +1,57 @@
+#include <algorithm>
 #include <cstdio>
+#include <cstring>
 #include <queue>
 #include <vector>
-const int MaxN = 2e2 + 5;
-const int MaxM = 2e5 + 5;
-class edge
-{
-  public:
-    int to;
-    long long use;
-    long long flow;
-    edge(int x, long long y)
-    {
-        to = x;
-        use = 0;
-        flow = y;
-    }
-    edge()
-    {
-        to = 0;
-        use = 0;
-        flow = 0;
-    }
-};
+constexpr int MaxN = 2e2 + 5;
 int n, m, s, t;
-int depth[MaxN];
-std::vector<edge> link[MaxN];
-long long solve()
+int cnt[MaxN];
+int last[MaxN];
+long long answer;
+std::queue<int> queue;
+std::vector<int> link[MaxN];
+std::vector<long long> max[MaxN];
+std::vector<long long> use[MaxN];
+std::pair<int, int> rev[MaxN][MaxN];
+void bfs()
 {
-    std::queue<int> bfs;
-    bfs.push(s);
-    depth[s] = 1;
-    for (; !bfs.empty();)
+    queue.push(s);
+    cnt[s] = 1;
+    for (; !queue.empty();)
     {
-        int now = bfs.front();
-        bfs.pop();
-        for (edge to : link[now])
+        int u = queue.front();
+        queue.pop();
+        for (int i = 0; i < int(link[u].size()); i++)
         {
-            if (depth[to.to] == 0)
+            int v = link[u][i];
+            if (cnt[v] == 0 && max[u][i] - use[u][i] > 0)
             {
-                depth[to.to] = depth[now] + 1;
-                bfs.push(to.to);
+                cnt[v] = cnt[u] + 1;
+                queue.push(v);
+            }
+        }
+    }
+}
+long long dfs(int u, long long f)
+{
+    if (u == t || f == 0)
+    {
+        return f;
+    }
+    for (int i = last[i]; i < int(link[u].size()); i++)
+    {
+        last[i] = i;
+        int v = link[u][i];
+        if (cnt[u] + 1 == cnt[v])
+        {
+            long long push = std::min(f, max[u][i] - use[u][i]);
+            push = dfs(v, push);
+            if (push > 0)
+            {
+                use[u][i] += push;
+                auto temp = rev[u][v];
+                use[temp.first][temp.second] -= push;
+                return push;
             }
         }
     }
@@ -50,11 +62,34 @@ int main()
     scanf("%d%d%d%d", &n, &m, &s, &t);
     for (int i = 1; i <= m; i++)
     {
-        int u, v, w;
-        scanf("%d%d%d", &u, &v, &w);
-        link[u].push_back(edge{v, w});
+        int u, v;
+        long long w;
+        scanf("%d%d%lld", &u, &v, &w);
+        link[u].push_back(v);
+        link[v].push_back(u);
+        max[u].push_back(w);
+        max[v].push_back(w);
+        use[u].push_back(0);
+        use[v].push_back(w);
+        int x, y;
+        x = u;
+        y = link[u].size() - 1;
+        rev[v][u] = {x, y};
+        x = v;
+        y = link[v].size() - 1;
+        rev[u][v] = {x, y};
     }
-    long long answer = solve();
+    for (;;)
+    {
+        memset(cnt, 0, sizeof(cnt));
+        bfs();
+        if (cnt[t] == 0)
+        {
+            break;
+        }
+        memset(last, 0, sizeof(last));
+        answer += dfs(s, 1e18);
+    }
     printf("%lld\n", answer);
     return 0;
 }
