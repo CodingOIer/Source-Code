@@ -1,12 +1,14 @@
-#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <queue>
 #include <vector>
 constexpr int MaxN = 2e2 + 5;
-int n, m, s, t;
+constexpr long long MaxFlow = 1e18;
+int n, m;
+int s, t;
 int cnt[MaxN];
 int last[MaxN];
+long long x;
 long long answer;
 std::queue<int> queue;
 std::vector<int> link[MaxN];
@@ -38,7 +40,7 @@ long long dfs(int u, long long f)
     {
         return f;
     }
-    for (int i = last[i]; i < int(link[u].size()); i++)
+    for (int i = last[u]; i < int(link[u].size()); i++)
     {
         last[u] = i;
         int v = link[u][i];
@@ -59,7 +61,7 @@ long long dfs(int u, long long f)
 }
 int main()
 {
-    scanf("%d%d%d%d", &n, &m, &s, &t);
+    scanf("%d%d%lld", &n, &m, &x);
     for (int i = 1; i <= m; i++)
     {
         int u, v;
@@ -79,6 +81,8 @@ int main()
         y = link[v].size() - 1;
         rev[u][v] = {x, y};
     }
+    s = 1;
+    t = n;
     for (;;)
     {
         memset(cnt, 0, sizeof(cnt));
@@ -87,9 +91,16 @@ int main()
         {
             break;
         }
-        memset(last, 0, sizeof(last));
-        answer += dfs(s, 1e18);
+        memset(last, 0, sizeof(cnt));
+        answer += dfs(s, MaxFlow);
     }
-    printf("%lld\n", answer);
+    if (answer == 0)
+    {
+        printf("Orz Ni Jinan Saint Cow!\n");
+    }
+    else
+    {
+        printf("%lld %lld\n", answer, x / answer + (x % answer != 0 ? 1 : 0));
+    }
     return 0;
 }
