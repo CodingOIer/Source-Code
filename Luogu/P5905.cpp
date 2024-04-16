@@ -1,121 +1,105 @@
-#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <queue>
 #include <vector>
-const int MaxN = 3e3 + 5;
-const int MaxM = 1e4 + 5;
-int n, m;
-bool vis[MaxN];
-long long h[MaxN];
-long long dis[MaxN];
-std::priority_queue<std::pair<int, int>> queue;
-std::vector<std::pair<int, int>> link[MaxN];
-std::vector<std::pair<std::pair<int, int>, int>> links;
-std::vector<std::pair<std::pair<int, int>, int>> temp_links;
-void Dijkstra(int x)
+constexpr int MaxN = 3e3 + 5;
+class node
 {
+  public:
+    int to, w;
+    node(int x, int y)
+    {
+        to = x;
+        w = y;
+    }
+};
+int n, m;
+int h[MaxN];
+int dis[MaxN];
+bool vis[MaxN];
+std::vector<node> link[MaxN];
+std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, std::greater<std::pair<int, int>>> queue;
+void Dijkstra(int r)
+{
+    dis[r] = 0;
+    queue.push({0, r});
     for (; !queue.empty();)
     {
+        int u = queue.top().second;
         queue.pop();
-    }
-    for (int i = 1; i <= n; i++)
-    {
-        vis[i] = false;
-        dis[i] = 0x3f3f3f3f3f3f3f3f;
-    }
-    queue.push({0, x});
-    for (; !queue.empty();)
-    {
-        auto tmp = queue.top();
-        queue.pop();
-        int id, len;
-        id = tmp.second;
-        len = tmp.first;
-        len = -len;
-        if (vis[id])
+        if (vis[u])
         {
             continue;
         }
-        dis[id] = len;
-        vis[id] = true;
-        for (auto to : link[id])
+        vis[u] = true;
+        for (auto l : link[u])
         {
-            if (vis[to.first])
+            if (dis[u] + l.w < dis[l.to])
             {
-                continue;
+                dis[l.to] = dis[u] + l.w;
+                queue.push({dis[l.to], l.to});
             }
-            queue.push({-len - to.second, to.first});
         }
     }
 }
 int main()
 {
-    memset(h, 0x3f, sizeof(h));
     scanf("%d%d", &n, &m);
     for (int i = 1; i <= m; i++)
     {
         int u, v, w;
         scanf("%d%d%d", &u, &v, &w);
-        links.push_back({{u, v}, w});
+        link[u].push_back(node(v, w));
     }
     for (int i = 1; i <= n; i++)
     {
-        links.push_back({{0, i}, 0});
+        link[0].push_back(node(i, 0));
     }
-    bool error = true;
-    h[0] = 0;
+    bool invalid = true;
+    memset(h, 0x3f, sizeof(h));
     for (int i = 1; i <= n - 1; i++)
     {
         bool change = false;
-        for (auto road : links)
+        for (int j = 1; j <= n; j++)
         {
-            int u, v, w;
-            u = road.first.first;
-            v = road.first.second;
-            w = road.second;
-            if (h[v] > h[u] + w)
+            for (auto l : link[j])
             {
-                h[v] = h[u] + w;
-                change = true;
+                if (h[j] + l.w < h[l.to])
+                {
+                    change = true;
+                    h[l.to] = h[j] + l.w;
+                }
             }
         }
         if (!change)
         {
-            error = false;
+            invalid = false;
             break;
         }
     }
-    if (error)
+    if (invalid)
     {
         printf("-1\n");
         return 0;
     }
     for (int i = 1; i <= n; i++)
     {
-        links.pop_back();
-    }
-    for (int i = 0; i <= m - 1; i++)
-    {
-        links[i].second = links[i].second + h[links[i].first.first] - h[links[i].first.second];
-        link[links[i].first.first].push_back({links[i].first.second, links[i].second});
+        for (auto &l : link[i])
+        {
+            l.w += h[i] - h[l.to];
+        }
     }
     for (int i = 1; i <= n; i++)
     {
+        memset(dis, 0x3f, sizeof(dis));
+        memset(vis, false, sizeof(vis));
         Dijkstra(i);
-        long long sum = 0;
+        long long answer = 0;
         for (int j = 1; j <= n; j++)
         {
-            if (dis[j] != 0x3f3f3f3f3f3f3f3f)
-            {
-                dis[j] = dis[j] + h[j] - h[i];
-            }
+            answer += j * (dis[j] == 0x3f3f3f3f ? 1e9 : dis[j] + h[j] - h[i]);
         }
-        for (int j = 1; j <= n; j++)
-        {
-            sum += (dis[j] == 0x3f3f3f3f3f3f3f3f ? 1e9 * j : dis[j] * j);
-        }
-        printf("%lld\n", sum);
+        printf("%lld\n", answer);
     }
     return 0;
 }
