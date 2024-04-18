@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <csetjmp>
 #include <cstdio>
 #include <cstring>
 #include <map>
@@ -18,7 +19,7 @@ std::vector<int> link[MaxN];
 std::vector<int> rev_link[MaxN];
 std::vector<int> new_cnt[MaxN];
 std::vector<int> new_link[MaxN];
-std::vector<double> repair[MaxN];
+std::vector<int> repair[MaxN];
 std::map<std::pair<int, int>, int> map;
 void dfs1(int u)
 {
@@ -46,13 +47,15 @@ void dfs2(int u, int c)
         dfs2(v, c);
     }
 }
-int calc(int x, double r)
+inline int calc(int x, int r)
 {
-    if (x == 0)
+    int res = 0;
+    for (; x > 0;)
     {
-        return 0;
+        res += x;
+        x = x * r / 10;
     }
-    return x + calc(int(x * r), r);
+    return res;
 }
 void bfs()
 {
@@ -89,7 +92,7 @@ int main()
         link[u].push_back(v);
         rev_link[v].push_back(u);
         cnt[u].push_back(w);
-        repair[u].push_back(r);
+        repair[u].push_back(int(r * 10));
     }
     scanf("%d", &s);
     dfn.push_back(0);
@@ -109,7 +112,7 @@ int main()
     }
     for (int i = 1; i <= n; i++)
     {
-        for (int j = 0; j < link[i].size(); i++)
+        for (int j = 0; j < link[i].size(); j++)
         {
             int u = i;
             int v = link[i][j];
@@ -121,16 +124,15 @@ int main()
             if (!map.count({u, v}))
             {
                 new_link[color[u]].push_back(color[v]);
-                new_link[color[v]].push_back(color[u]);
             }
             map[{u, v}] = std::max(map[{u, v}], cnt[i][j]);
-            map[{v, u}] = map[{u, v}];
         }
     }
+    s = color[s];
     memset(vis, false, sizeof(vis));
     bfs();
     int answer = 0;
-    for (int i = 1; i <= n; i++)
+    for (int i = 1; i <= idx; i++)
     {
         answer = std::max(answer, all[i]);
     }
