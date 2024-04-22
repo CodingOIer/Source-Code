@@ -7,17 +7,19 @@
 #include <utility>
 #include <vector>
 constexpr int MaxN = 8e4 + 5;
+int idx;
 int n, m, s;
+int in[MaxN];
 int all[MaxN];
 int block[MaxN];
 int color[MaxN];
+int answer[MaxN];
 bool vis[MaxN];
 std::queue<int> queue;
 std::vector<int> dfn;
 std::vector<int> cnt[MaxN];
 std::vector<int> link[MaxN];
 std::vector<int> rev_link[MaxN];
-std::vector<int> new_cnt[MaxN];
 std::vector<int> new_link[MaxN];
 std::vector<int> repair[MaxN];
 std::map<std::pair<int, int>, int> map;
@@ -57,30 +59,6 @@ inline int calc(int x, int r)
     }
     return res;
 }
-void bfs()
-{
-    queue.push(s);
-    all[s] = block[s];
-    for (; !queue.empty();)
-    {
-        int u = queue.front();
-        queue.pop();
-        vis[u] = false;
-        for (int i = 0; i < new_link[u].size(); i++)
-        {
-            int v = new_link[u][i];
-            if (all[u] + map[{u, v}] + block[v] > all[v])
-            {
-                all[v] = all[u] + map[{u, v}] + block[v];
-                if (!vis[v])
-                {
-                    queue.push(v);
-                    vis[v] = true;
-                }
-            }
-        }
-    }
-}
 int main()
 {
     scanf("%d%d", &n, &m);
@@ -100,7 +78,6 @@ int main()
     {
         dfs1(i);
     }
-    int idx = 0;
     memset(vis, false, sizeof(vis));
     for (int i = n; i >= 1; i--)
     {
@@ -121,21 +98,51 @@ int main()
                 block[color[u]] += calc(cnt[i][j], repair[i][j]);
                 continue;
             }
-            if (!map.count({u, v}))
+            if (!map.count({color[u], color[v]}))
             {
                 new_link[color[u]].push_back(color[v]);
+                in[color[v]]++;
             }
-            map[{u, v}] = std::max(map[{u, v}], cnt[i][j]);
+            map[{color[u], color[v]}] = std::max(map[{color[u], color[v]}], cnt[i][j]);
         }
     }
     s = color[s];
-    memset(vis, false, sizeof(vis));
-    bfs();
-    int answer = 0;
+    std::vector<int> l;
     for (int i = 1; i <= idx; i++)
     {
-        answer = std::max(answer, all[i]);
+        if (in[i] == 0)
+        {
+            queue.push(i);
+        }
     }
-    printf("%d\n", answer);
+    for (; !queue.empty();)
+    {
+        l.push_back(queue.front());
+        int u = queue.front();
+        queue.pop();
+        for (auto v : link[u])
+        {
+            in[v]--;
+            if (in[v] == 0)
+            {
+                queue.push(v);
+            }
+        }
+    }
+    memset(answer, 0, sizeof(answer));
+    answer[s] = block[s];
+    for (auto u : l)
+    {
+        for (auto v : new_link[u])
+        {
+            answer[v] = std::max(answer[v], answer[u] + map[{u, v}] + block[v]);
+        }
+    }
+    int max = 0;
+    for (int i = 1; i <= idx; i++)
+    {
+        max = std::max(max, answer[i]);
+    }
+    printf("%d\n", max);
     return 0;
 }
