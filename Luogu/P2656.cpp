@@ -2,9 +2,7 @@
 #include <csetjmp>
 #include <cstdio>
 #include <cstring>
-#include <map>
 #include <queue>
-#include <utility>
 #include <vector>
 constexpr int MaxN = 8e4 + 5;
 int idx;
@@ -21,8 +19,8 @@ std::vector<int> cnt[MaxN];
 std::vector<int> link[MaxN];
 std::vector<int> rev_link[MaxN];
 std::vector<int> new_link[MaxN];
+std::vector<int> new_cnt[MaxN];
 std::vector<int> repair[MaxN];
-std::map<std::pair<int, int>, int> map;
 void dfs1(int u)
 {
     if (vis[u])
@@ -98,12 +96,9 @@ int main()
                 block[color[u]] += calc(cnt[i][j], repair[i][j]);
                 continue;
             }
-            if (!map.count({color[u], color[v]}))
-            {
-                new_link[color[u]].push_back(color[v]);
-                in[color[v]]++;
-            }
-            map[{color[u], color[v]}] = std::max(map[{color[u], color[v]}], cnt[i][j]);
+            new_link[color[u]].push_back(color[v]);
+            in[color[v]]++;
+            new_cnt[color[u]].push_back(cnt[i][j]);
         }
     }
     s = color[s];
@@ -129,13 +124,14 @@ int main()
             }
         }
     }
-    memset(answer, 0, sizeof(answer));
+    memset(answer, -0x3f3f3f3f, sizeof(answer));
     answer[s] = block[s];
     for (auto u : l)
     {
-        for (auto v : new_link[u])
+        for (int i = 0; i < new_link[u].size(); i++)
         {
-            answer[v] = std::max(answer[v], answer[u] + map[{u, v}] + block[v]);
+            int v = new_link[u][i];
+            answer[v] = std::max(answer[v], answer[u] + new_cnt[u][i] + block[v]);
         }
     }
     int max = 0;
