@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <utility>
-constexpr int MaxN = 2e5 + 5;
+constexpr int MaxN = 2e2 + 5;
 int n, m;
 int p[MaxN];
 int l[MaxN];
@@ -66,8 +66,8 @@ inline int mar(int l, int r)
 }
 int main()
 {
-    freopen("../ex_hill2.in", "r", stdin);
-    freopen("./hill.out", "w", stdout);
+    // freopen("../ex_hill2.in", "r", stdin);
+    // freopen("./hill.out", "w", stdout);
     scanf("%d%d", &n, &m);
     for (int i = 1; i <= n; i++)
     {
@@ -104,9 +104,9 @@ int main()
         long long answer = 0;
         int top = map(x, y);
         answer += (top - p[x]) * a + (top - p[y]) * b;
-        int can_use_l = mal(x, y) - l[x];
-        int can_use_r = mar(x, y) - r[x];
         int m = mai(x, y);
+        int can_use_l = (m - x) - (mal(x, y) - l[x]);
+        int can_use_r = (mar(x, y) - r[x]) - (y - m);
         answer += 2ll * (std::max(0, (m - x) - can_use_l) + std::max(0, (y - m) - can_use_r));
         printf("%lld\n", answer);
     }
