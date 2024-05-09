@@ -1,32 +1,44 @@
-#include <algorithm>
 #include <cstdio>
-#include <utility>
-#include <vector>
 constexpr int MaxN = 1e6 + 5;
+class node
+{
+  public:
+    int x;
+    int k;
+    node *left;
+    node *right;
+    node()
+    {
+        x = 0;
+        k = 0;
+        left = nullptr;
+        right = nullptr;
+    }
+    void update()
+    {
+        k = (left == nullptr ? 0 : left->k) + (right == nullptr ? 0 : right->k) + x;
+    }
+};
 int n, m;
 int p[MaxN];
-int f[MaxN];
-std::vector<std::pair<int, int>> v;
-bool cmp(std::pair<int, int> x, std::pair<int, int> y)
+node *root;
+void build(node *c, int s, int t)
 {
-    if (x.first < y.first)
+    if (s == t)
     {
-        return true;
+        return;
     }
-    else if (x.first > y.first)
+    int mid = (s + t) / 2;
+    c->left = new node;
+    c->right = new node;
+    build(c->left, s, mid);
+    build(c->right, mid + 1, t);
+}
+void change(node *c, int s, int t, int w, int v)
+{
+    if (s == t)
     {
-        return false;
-    }
-    else
-    {
-        if (x.first % 2 == 1)
-        {
-            return x.second < y.second;
-        }
-        else
-        {
-            return x.second > y.second;
-        }
+        c->x++;
     }
 }
 int main()
@@ -36,17 +48,7 @@ int main()
     {
         scanf("%d", &p[i]);
     }
-    for (int i = 1; i <= m; i++)
-    {
-        int l, r;
-        scanf("%d%d", &l, &r);
-        v.push_back({l, r});
-    }
-    std::sort(v.begin(), v.end(), cmp);
-    int l, r, res;
-    l = 1;
-    r = 0;
-    res = 0;
-    for ()
-        return 0;
+    root = new node;
+    build(root, 1, n);
+    return 0;
 }
