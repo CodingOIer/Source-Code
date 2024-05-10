@@ -1,54 +1,109 @@
+#include <algorithm>
 #include <cstdio>
+#include <utility>
+#include <vector>
 constexpr int MaxN = 1e6 + 5;
-class node
-{
-  public:
-    int x;
-    int k;
-    node *left;
-    node *right;
-    node()
-    {
-        x = 0;
-        k = 0;
-        left = nullptr;
-        right = nullptr;
-    }
-    void update()
-    {
-        k = (left == nullptr ? 0 : left->k) + (right == nullptr ? 0 : right->k) + x;
-    }
-};
 int n, m;
 int p[MaxN];
-node *root;
-void build(node *c, int s, int t)
+int q[MaxN];
+int answer[MaxN];
+std::vector<std::pair<std::pair<int, int>, int>> v;
+inline bool cmp(std::pair<std::pair<int, int>, int> x, std::pair<std::pair<int, int>, int> y)
 {
-    if (s == t)
+    if (x.first.first < y.first.first)
     {
-        return;
+        return true;
     }
-    int mid = (s + t) / 2;
-    c->left = new node;
-    c->right = new node;
-    build(c->left, s, mid);
-    build(c->right, mid + 1, t);
-}
-void change(node *c, int s, int t, int w, int v)
-{
-    if (s == t)
+    else if (x.first.first > y.first.first)
     {
-        c->x++;
+        return false;
+    }
+    else
+    {
+        return x.first.second < y.first.second;
     }
 }
 int main()
 {
-    scanf("%d%d", &n, &m);
+    scanf("%d", &n);
     for (int i = 1; i <= n; i++)
     {
         scanf("%d", &p[i]);
     }
-    root = new node;
-    build(root, 1, n);
+    scanf("%d", &m);
+    for (int i = 1; i <= m; i++)
+    {
+        int x, y;
+        scanf("%d%d", &x, &y);
+        v.push_back({{x, y}, i});
+    }
+    std::sort(v.begin(), v.end(), cmp);
+    auto k = v.begin();
+    int l, r;
+    l = 1;
+    r = 1;
+    int res = 1;
+    q[p[1]]++;
+    for (; k != v.end();)
+    {
+        for (; l < (*k).first.first;)
+        {
+            q[p[l]]--;
+            if (q[p[l]] == 0)
+            {
+                res--;
+            }
+            if (q[p[l]] == 1)
+            {
+                res++;
+            }
+            l++;
+        }
+        for (; l > (*k).first.first;)
+        {
+            l--;
+            q[p[l]]++;
+            if (q[p[l]] == 0)
+            {
+                res--;
+            }
+            if (q[p[l]] == 1)
+            {
+                res++;
+            }
+        }
+        for (; r < (*k).first.second;)
+        {
+            r++;
+            q[p[r]]++;
+            if (q[p[r]] == 0)
+            {
+                res--;
+            }
+            if (q[p[r]] == 1)
+            {
+                res++;
+            }
+        }
+        for (; r > (*k).first.second;)
+        {
+            q[p[r]]--;
+            if (q[p[r]] == 0)
+            {
+                res--;
+            }
+            if (q[p[r]] == 1)
+            {
+                res++;
+            }
+            r--;
+        }
+        answer[(*k).second] = res;
+        k++;
+    }
+    for (int i = 1; i <= m; i++)
+    {
+        printf("%d\n", answer[i]);
+    }
     return 0;
 }
