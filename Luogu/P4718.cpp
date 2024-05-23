@@ -1,62 +1,40 @@
 #include <cstdio>
 #include <cstring>
-constexpr int MaxN = 1e4 + 5;
-char temp[MaxN];
+constexpr int MaxN = 1e5 + 5;
+int t;
+char cmd[MaxN];
 char result[MaxN];
-char command[MaxN];
-long long n;
-inline int getLen(long long x)
-{
-    int res = 0;
-    for (; x != 0;)
-    {
-        res++;
-        x /= 10;
-    }
-    return res;
-}
+long long x;
 void solve()
 {
-    temp[0] = 0;
-    result[0] = 0;
-    command[0] = 0;
-    scanf("%lld", &n);
-    sprintf(command, "factor %lld", n);
-    FILE *pipe = popen(command, "r");
-    for (; fgets(temp, sizeof(temp), pipe);)
+    scanf("%lld", &x);
+    sprintf(cmd, "factor %lld", x);
+    FILE *p = popen(cmd, "r");
+    fgets(result, sizeof(result), p);
+    long long r = 0;
+    long long k = 1;
+    int l = strlen(result);
+    for (int i = l - 2;; i--)
     {
-        sprintf(result, "%s%s", result, temp);
+        if (result[i] == ' ')
+        {
+            break;
+        }
+        r += k * (result[i] - '0');
+        k *= 10;
     }
-    int len = getLen(n);
-    int space = 0;
-    int s_len = strlen(result);
-    for (int i = 0; i < s_len; i++)
-    {
-        space += result[i] == ' ' ? 1 : 0;
-    }
-    if (space == 1)
+    if (r == x)
     {
         printf("Prime\n");
     }
     else
     {
-        long long answer = 0;
-        for (int i = len + 2; i < s_len - 1; i++)
-        {
-            if (result[i] == ' ')
-            {
-                answer = 0;
-                continue;
-            }
-            answer = answer * 10 + result[i] - '0';
-        }
-        printf("%lld\n", answer);
+        printf("%lld\n", r);
     }
-    fclose(pipe);
+    pclose(p);
 }
 int main()
 {
-    int t;
     scanf("%d", &t);
     for (int i = 1; i <= t; i++)
     {
