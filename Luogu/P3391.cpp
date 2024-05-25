@@ -2,7 +2,7 @@
 #include <random>
 #include <utility>
 constexpr int MaxN = 1e5 + 5;
-std::mt19937 rnd(std::random_device{}());
+std::mt19937 rnd(6);
 class node
 {
   public:
@@ -76,6 +76,7 @@ void insert(node *c, node *x)
         return;
     }
     insert(c->right, x);
+    c->update();
 }
 std::pair<node *, node *> split(node *c, int rk)
 {
@@ -136,16 +137,20 @@ node *merge(node *l, node *r)
         return r;
     }
 }
-void pt(node *c)
+void pt(node *c, bool f = true)
 {
     if (c == nullptr)
     {
         return;
     }
     c->downstream();
-    pt(c->left);
+    pt(c->left, false);
     printf("%d ", c->x);
-    pt(c->right);
+    pt(c->right, false);
+    if (f)
+    {
+        printf("\n");
+    }
 }
 void rev(int l, int r)
 {
@@ -163,8 +168,6 @@ int main()
     {
         insert(root, new node(i));
     }
-    pt(root);
-    printf("\n");
     for (int i = 1; i <= m; i++)
     {
         int l, r;
