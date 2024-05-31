@@ -1,12 +1,9 @@
-#include <algorithm>
 #include <cstdio>
-#include <utility>
-#include <vector>
 constexpr int MaxN = 1e5 + 5;
 int n;
 int p[MaxN];
+long long f[MaxN];
 long long tree[MaxN];
-std::vector<std::pair<int, int>> v;
 inline void change(int x, int v)
 {
     for (; x <= n; x += x & -x)
@@ -14,18 +11,14 @@ inline void change(int x, int v)
         tree[x] += v;
     }
 }
-inline long long query(int x)
+inline int query(int x)
 {
-    long long res = 0;
-    for (; x > 0; x += x & -x)
+    int r = 0;
+    for (; x > 0; x -= x & -x)
     {
-        res += tree[x];
+        r += tree[x];
     }
-    return res;
-}
-inline long long query(int l, int r)
-{
-    return query(r) - query(l - 1);
+    return r;
 }
 int main()
 {
@@ -33,21 +26,18 @@ int main()
     for (int i = 1; i <= n; i++)
     {
         scanf("%d", &p[i]);
-        v.push_back({p[i], i});
-    }
-    std::sort(v.begin(), v.end());
-    auto it = v.begin();
-    for (int i = 1; i <= n; i++)
-    {
-        change(i, i - 1);
+        p[i]++;
     }
     long long answer = 0;
-    for (int j = 0; j < n; j++)
+    for (int i = 1; i <= n; i++)
     {
-        for (; it != v.end() && (*it).first < j;)
-        {
-        }
+        f[p[i]] += i - query(p[i]) - 1;
+        change(p[i], 1);
+    }
+    for (int i = 1; i <= n; i++)
+    {
         printf("%lld\n", answer);
+        answer += f[i];
     }
     return 0;
 }
