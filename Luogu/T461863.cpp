@@ -3,6 +3,7 @@
 constexpr int MaxN = 2e5 + 5;
 int n, m;
 int fd[MaxN];
+int like[MaxN];
 int color[MaxN];
 std::vector<int> in[MaxN];
 int find(int x)
@@ -23,6 +24,14 @@ inline void merge(int x, int y)
         return;
     }
     fd[fy] = fx;
+    if (like[fx] != 0 && like[fy] != 0)
+    {
+        merge(like[fx], like[fy]);
+    }
+    else
+    {
+        like[fy] = like[fx];
+    }
 }
 int main()
 {
@@ -35,13 +44,13 @@ int main()
     {
         int u, v;
         scanf("%d%d", &u, &v);
-        in[v].push_back(u);
-    }
-    for (int i = 1; i <= n; i++)
-    {
-        for (int j = 1; j < in[i].size(); j++)
+        if (like[find(u)] != 0)
         {
-            merge(in[i][j - 1], in[i][j]);
+            merge(like[find(u)], v);
+        }
+        else
+        {
+            like[find(u)] = v;
         }
     }
     int cnt = 0;
