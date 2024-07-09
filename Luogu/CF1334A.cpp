@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+#include <cstdio>
 const int MaxN = 1e2 + 5;
 int t;
 int n;
