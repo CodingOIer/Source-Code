@@ -3,13 +3,13 @@
 #include <cstdio>
 #include <map>
 #include <vector>
-constexpr int MaxN = 5e2 + 5;
+constexpr int MaxN = 5e4 + 5;
 constexpr int MaxL = 2e3 + 5;
 int n, q;
 int max;
 int p[MaxN];
 int id[MaxN];
-int st[21][MaxN];
+int st[21][2 * MaxN];
 int vis[MaxL];
 int depth[MaxN];
 int first[MaxN];
@@ -88,6 +88,8 @@ int mxx(int x, int y)
 }
 int LCA(int x, int y)
 {
+    x = first[x];
+    y = first[y];
     if (x > y)
     {
         std::swap(x, y);
