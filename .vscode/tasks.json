@@ -3,7 +3,7 @@
         {
             "type": "cppbuild",
             "label": "C/C++: Clang++ Build C++ File",
-            "command": "clang++",
+            "command": "g++",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
