@@ -17,7 +17,7 @@ std::map<long long, unsigned long long> map;
 std::map<long long, unsigned long long> link;
 std::map<unsigned long long, unsigned long long> rev;
 std::vector<long long> prime;
-void init(int limit = 2e3)
+void init(int limit = 3e3)
 {
     for (long long i = 1; i * i <= 1e10; i++)
     {
@@ -134,6 +134,6 @@ int main()
         cnt[h[i]] = 0;
         cnt[rev[h[i]]] = 0;
     }
-    printf("%d\n", answer - (p[1] == 78692953));
+    printf("%d\n", answer);
     return 0;
 }
