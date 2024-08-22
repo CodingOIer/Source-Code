@@ -4,6 +4,28 @@
 #include <queue>
 #include <tuple>
 #include <vector>
+long long gcd(long long x, long long y)
+{
+    for (;;)
+    {
+        if (x == y || y == 0)
+        {
+            return x;
+        }
+        else if (x == 0)
+        {
+            return y;
+        }
+        else if (x > y)
+        {
+            x %= y;
+        }
+        else if (x < y)
+        {
+            y %= x;
+        }
+    }
+}
 class frac
 {
   public:
@@ -125,7 +147,7 @@ class frac
             y = 1;
             return;
         }
-        long long g = std::gcd(x, y);
+        long long g = gcd(x, y);
         x /= g;
         y /= g;
         if (x < 0 && y < 0)
