@@ -3,13 +3,13 @@
         {
             "type": "cppbuild",
             "label": "C/C++: Clang++ Build C++ File",
-            "command": "g++",
+            "command": "clang++",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
                 "-o",
-                "${workspaceFolder}\\.build\\${fileBasenameNoExtension}.exe",
+                "${workspaceFolder}/.build/${fileBasenameNoExtension}.exe",
                 "-std=c++20"
             ],
             "options": {
