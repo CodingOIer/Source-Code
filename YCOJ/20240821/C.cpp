@@ -90,10 +90,6 @@ int main()
             w[v].l = std::max(w[v].l, w[u].l + 1);
         }
     }
-    /* for (int i = 1; i <= n; i++)
-    {
-        printf("%d: [%d, %d]\n", w[i].id, w[i].l, w[i].r);
-    } */
     std::sort(w + 1, w + 1 + n, [](const scope &x, const scope &y) -> bool { return x.l < y.l; });
     auto it = w + 1;
     for (int i = 1; i <= n; i++)
