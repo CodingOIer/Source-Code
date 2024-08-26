@@ -1,82 +1,31 @@
 #include <algorithm>
 #include <cstdio>
+#include <set>
 constexpr int MaxN = 1e5 + 5;
-int n, q;
+int n, m;
 int a[MaxN];
 int b[MaxN];
-int tree2[MaxN * 4];
-long long tree1[MaxN * 4];
-void change1(int c, int s, int t, int w)
+long long tree[MaxN];
+std::set<int> set;
+void change(int x, long long val)
 {
-    if (s == t)
+    for (; x <= n; x += x & -x)
     {
-        tree1[c] = a[s];
-        return;
+        tree[x] += val;
     }
-    int mid = (s + t) / 2;
-    if (w <= mid)
-    {
-        change1(c * 2, s, mid, w);
-    }
-    else
-    {
-        change1(c * 2 + 1, mid + 1, t, w);
-    }
-    tree1[c] = tree1[c * 2] + tree1[c * 2 + 1];
 }
-void change2(int c, int s, int t, int w)
+long long query(int x)
 {
-    if (s == t)
-    {
-        tree2[c] = b[s] == 1 ? 1 : 0;
-        return;
-    }
-    int mid = (s + t) / 2;
-    if (w <= mid)
-    {
-        change2(c * 2, s, mid, w);
-    }
-    else
-    {
-        change2(c * 2 + 1, mid + 1, t, w);
-    }
-    tree2[c] = tree2[c * 2] + tree2[c * 2 + 1];
-}
-long long query1(int c, int s, int t, int l, int r)
-{
-    if (l <= s && t <= r)
-    {
-        return tree1[c];
-    }
-    int mid = (s + t) / 2;
     long long res = 0;
-    if (l <= mid)
+    for (; x > 0; x -= x & -x)
     {
-        res += query1(c * 2, s, mid, l, r);
-    }
-    if (r > mid)
-    {
-        res += query1(c * 2 + 1, mid + 1, t, l, r);
+        res += tree[x];
     }
     return res;
 }
-int query2(int c, int s, int t, int l, int r)
+long long query(int l, int r)
 {
-    if (l <= s && t <= r)
-    {
-        return tree2[c];
-    }
-    int mid = (s + t) / 2;
-    int res = 0;
-    if (l <= mid)
-    {
-        res += query2(c * 2, s, mid, l, r);
-    }
-    if (r > mid)
-    {
-        res += query2(c * 2 + 1, mid + 1, t, l, r);
-    }
-    return res;
+    return query(r) - query(l - 1);
 }
 int main()
 {
@@ -84,15 +33,18 @@ int main()
     for (int i = 1; i <= n; i++)
     {
         scanf("%d", &a[i]);
-        change1(1, 1, n, i);
+        change(i, a[i]);
     }
     for (int i = 1; i <= n; i++)
     {
         scanf("%d", &b[i]);
-        change2(1, 1, n, i);
+        if (b[i] != 1)
+        {
+            set.insert(i);
+        }
     }
-    scanf("%d", &q);
-    for (int i = 1; i <= q; i++)
+    scanf("%d", &m);
+    for (int i = 1; i <= m; i++)
     {
         int op;
         scanf("%d", &op);
@@ -100,52 +52,51 @@ int main()
         {
             int x, y;
             scanf("%d%d", &x, &y);
+            change(x, -a[x]);
             a[x] = y;
-            change1(1, 1, n, x);
+            change(x, a[x]);
         }
         else if (op == 2)
         {
             int x, y;
             scanf("%d%d", &x, &y);
-            change2(1, 1, n, x);
+            if (b[x] != 1)
+            {
+                set.erase(x);
+            }
             b[x] = y;
+            if (b[x] != -1)
+            {
+                set.insert(x);
+            }
         }
         else if (op == 3)
         {
-            int x, y;
-            scanf("%d%d", &x, &y);
-            long long v = a[x];
-            int it = x + 1;
-            for (; it <= y;)
+            int l, r;
+            scanf("%d%d", &l, &r);
+            if (set.empty())
             {
-                if (b[it] == 1)
-                {
-                    int l, r;
-                    l = it;
-                    r = y;
-                    int res = 0;
-                    for (; l <= r;)
-                    {
-                        int mid = (l + r) / 2;
-                        if (query2(1, 1, n, it, mid) == mid - it + 1)
-                        {
-                            res = mid;
-                            l = mid + 1;
-                        }
-                        else
-                        {
-                            r = mid - 1;
-                        }
-                    }
-                    v += query1(1, 1, n, it, res);
-                }
-                else
-                {
-                    v = std::max(v + a[it], v * b[it]);
-                }
-                it++;
+                printf("%lld\n", query(l, r));
             }
-            printf("%lld\n", v);
+            long long val = 0;
+            int it = l;
+            for (; it <= r;)
+            {
+                it += std::max(val + a[it], val * b[it]);
+                if (it == r)
+                {
+                    break;
+                }
+                auto next = set.upper_bound(it);
+                if (next == set.end())
+                {
+                    val += query(it + 1, r);
+                    break;
+                }
+                val += query(it + 1, *next - 1);
+                it = *next;
+            }
+            printf("%lld\n", val);
         }
     }
     return 0;
