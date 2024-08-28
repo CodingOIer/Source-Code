@@ -25,6 +25,10 @@ long long query(int x)
 }
 long long query(int l, int r)
 {
+    if (l > r)
+    {
+        return 0;
+    }
     return query(r) - query(l - 1);
 }
 int main()
@@ -65,7 +69,7 @@ int main()
                 set.erase(x);
             }
             b[x] = y;
-            if (b[x] != -1)
+            if (b[x] != 1)
             {
                 set.insert(x);
             }
@@ -82,7 +86,7 @@ int main()
             int it = l;
             for (; it <= r;)
             {
-                it += std::max(val + a[it], val * b[it]);
+                val = std::max(val + a[it], val * b[it]);
                 if (it == r)
                 {
                     break;
@@ -93,8 +97,16 @@ int main()
                     val += query(it + 1, r);
                     break;
                 }
-                val += query(it + 1, *next - 1);
-                it = *next;
+                if (*next <= r)
+                {
+                    val += query(it + 1, *next - 1);
+                    it = *next;
+                }
+                else
+                {
+                    val += query(it + 1, r);
+                    break;
+                }
             }
             printf("%lld\n", val);
         }
