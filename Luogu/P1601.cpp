@@ -1,385 +1,201 @@
+
+// ----------------------- Template Begin -----------------------
+
+#include <algorithm>
 #include <cstdio>
-#include <cstring>
-
-class BigNumber
+#include <string>
+#include <vector>
+namespace CodingOIer
 {
-  private:
-    int f;
-    int len;
-    int number[100005];
+struct inr // Copy from https://github.com/Baobaobear/MiniBigInteger/blob/main/bigint_tiny.h
+{
+    int sign;
+    std::vector<int> v;
 
-  public:
-    void print()
+    inr() : sign(1)
     {
-        if (f == -1)
-        {
-            printf("-");
-        }
-        for (int i = len; i >= 1; i--)
-        {
-            printf("%d", number[i]);
-        }
     }
-    bool operator<(const BigNumber __x)
+    inr(const std::string &s)
     {
-        if (len > __x.len)
+        *this = s;
+    }
+    inr(int v)
+    {
+        char buf[21];
+        sprintf(buf, "%d", v);
+        *this = buf;
+    }
+    void zip(int unzip)
+    {
+        if (unzip == 0)
         {
-            return f == 1 ? false : true;
-        }
-        else if (len < __x.len)
-        {
-            return f == 1 ? true : false;
+            for (int i = 0; i < (int)v.size(); i++)
+                v[i] = get_pos(i * 4) + get_pos(i * 4 + 1) * 10 + get_pos(i * 4 + 2) * 100 + get_pos(i * 4 + 3) * 1000;
         }
         else
-        {
-            for (int i = 1; i <= len; i++)
-            {
-                if (number[i] > __x.number[i])
-                {
-                    return f == 1 ? false : true;
-                }
-                else if (number[i] < __x.number[i])
-                {
-                    return f == 1 ? true : false;
-                }
-            }
-            return f == 1 ? true : false;
-        }
+            for (int i = (v.resize(v.size() * 4), (int)v.size() - 1), a; i >= 0; i--)
+                a = (i % 4 >= 2) ? v[i / 4] / 100 : v[i / 4] % 100, v[i] = (i & 1) ? a / 10 : a % 10;
+        set_sign(1, 1);
     }
-    bool operator>(const BigNumber __x)
+    int get_pos(unsigned pos) const
     {
-        if (len > __x.len)
-        {
-            return f == 1 ? true : false;
-        }
-        else if (len < __x.len)
-        {
-            return f == 1 ? false : true;
-        }
-        else
-        {
-            for (int i = 1; i <= len; i++)
-            {
-                if (number[i] > __x.number[i])
-                {
-                    return f == 1 ? true : false;
-                }
-                else if (number[i] < __x.number[i])
-                {
-                    return f == 1 ? false : true;
-                }
-            }
-            return f == 1 ? false : true;
-        }
+        return pos >= v.size() ? 0 : v[pos];
     }
-    bool operator==(const BigNumber __x)
+    inr &set_sign(int to, int rev)
     {
-        if (len != __x.len || f != __x.f)
-        {
-            return false;
-        }
-        else
-        {
-            for (int i = 1; i <= len; i++)
-            {
-                if (number[i] != __x.number[i])
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
+        for (int i = (int)v.size() - 1; i > 0 && v[i] == 0; i--)
+            v.erase(v.begin() + i);
+        sign = (v.size() == 0 || (v.size() == 1 && v[0] == 0)) ? 1 : (rev ? to * sign : to);
+        return *this;
     }
-    void operator=(const BigNumber __x)
+    std::string to_str() const
     {
-        memset(number, 0, sizeof(number));
-        f = __x.f;
-        len = __x.len;
-        for (int i = 1; i <= len; i++)
-        {
-            number[i] = __x.number[i];
-        }
+        inr b = *this;
+        std::string s;
+        for (int i = (b.zip(1), 0); i < (int)b.v.size(); ++i)
+            s += char(*(b.v.rbegin() + i) + '0');
+        return (sign < 0 ? "-" : "") + (s.empty() ? std::string("0") : s);
     }
-    void operator=(const int __x)
+    bool abs(const inr &b) const
     {
-        memset(number, 0, sizeof(number));
-        if (__x == 0)
-        {
-            f = 1;
-            len = 1;
-            number[1] = 0;
-        }
-        else
-        {
-            int __y;
-            if (__x < 0)
-            {
-                f = -1;
-                __y = -__x;
-            }
-            else
-            {
-                f = 1;
-                __y = __x;
-            }
-            len = 0;
-            for (; __y != 0;)
-            {
-                len++;
-                number[len] = __y % 10;
-                __y /= 10;
-            }
-        }
+        if (v.size() != b.v.size())
+            return v.size() < b.v.size();
+        for (int i = (int)v.size() - 1; i >= 0; i--)
+            if (v[i] != b.v[i])
+                return v[i] < b.v[i];
+        return false;
     }
-    void operator=(const long long __x)
+    inr operator-() const
     {
-        memset(number, 0, sizeof(number));
-        if (__x == 0)
-        {
-            f = 1;
-            len = 1;
-            number[1] = 0;
-        }
-        else
-        {
-            long long __y;
-            if (__x < 0)
-            {
-                f = -1;
-                __y = -__x;
-            }
-            else
-            {
-                f = 1;
-                __y = __x;
-            }
-            len = 0;
-            for (; __y != 0;)
-            {
-                len++;
-                number[len] = __y % 10;
-                __y /= 10;
-            }
-        }
+        inr c = *this;
+        c.sign = (v.size() > 1 || v[0]) ? -c.sign : 1;
+        return c;
     }
-    void operator=(const char s[])
+    inr &operator=(const std::string &s)
     {
-        memset(number, 0, sizeof(number));
         if (s[0] == '-')
-        {
-            f = -1;
-            len = strlen(s) - 1;
-            for (int i = 1; i <= len; i++)
-            {
-                number[i] = s[len - i + 1] - '0';
-            }
-        }
+            *this = s.substr(1);
         else
         {
-            f = 1;
-            len = strlen(s);
-            for (int i = 1; i <= len; i++)
-            {
-                number[i] = s[len - i] - '0';
-            }
+            for (int i = (v.clear(), 0); i < (int)s.size(); ++i)
+                v.push_back(*(s.rbegin() + i) - '0');
+            zip(0);
+        }
+        return set_sign(s[0] == '-' ? -1 : 1, sign = 1);
+    }
+    bool operator<(const inr &b) const
+    {
+        return sign != b.sign ? sign < b.sign : (sign == 1 ? abs(b) : b.abs(*this));
+    }
+    bool operator==(const inr &b) const
+    {
+        return v == b.v && sign == b.sign;
+    }
+    inr &operator+=(const inr &b)
+    {
+        if (sign != b.sign)
+            return *this = (*this) - -b;
+        v.resize(std::max(v.size(), b.v.size()) + 1);
+        for (int i = 0, carry = 0; i < (int)b.v.size() || carry; i++)
+        {
+            carry += v[i] + b.get_pos(i);
+            v[i] = carry % 10000, carry /= 10000;
+        }
+        return set_sign(sign, 0);
+    }
+    inr operator+(const inr &b) const
+    {
+        inr c = *this;
+        return c += b;
+    }
+    void add_mul(const inr &b, int mul)
+    {
+        v.resize(std::max(v.size(), b.v.size()) + 2);
+        for (int i = 0, carry = 0; i < (int)b.v.size() || carry; i++)
+        {
+            carry += v[i] + b.get_pos(i) * mul;
+            v[i] = carry % 10000, carry /= 10000;
         }
     }
-    BigNumber operator+(const BigNumber __x)
+    inr operator-(const inr &b) const
     {
-        BigNumber a, b;
-        BigNumber result;
-        a = 0;
-        result = 0;
-        a.f = f;
-        a.len = len;
-        for (int i = 1; i <= len; i++)
+        if (b.v.empty() || b.v.size() == 1 && b.v[0] == 0)
+            return *this;
+        if (sign != b.sign)
+            return (*this) + -b;
+        if (abs(b))
+            return -(b - *this);
+        inr c;
+        for (int i = 0, borrow = 0; i < (int)v.size(); i++)
         {
-            a.number[i] = number[i];
+            borrow += v[i] - b.get_pos(i);
+            c.v.push_back(borrow);
+            c.v.back() -= 10000 * (borrow >>= 31);
         }
-        b = __x;
-        int add;
-        add = 0;
-        result.len = a.len > b.len ? a.len : b.len;
-        if (a.f == -1 && b.f == -1)
-        {
-            result.f = -1;
-        }
-        if (a.f == -1 && b.f == 1)
-        {
-            a.f = 1;
-            return b - a;
-        }
-        if (a.f == 1 && b.f == -1)
-        {
-            b.f = 1;
-            return a - b;
-        }
-        if (a.f == 1 && b.f == 1)
-        {
-            result.f = 1;
-        }
-        for (int i = 1; i <= result.len; i++)
-        {
-            result.number[i] = a.number[i] + b.number[i] + add;
-            add = 0;
-            for (; result.number[i] >= 10;)
-            {
-                result.number[i] -= 10;
-                add++;
-            }
-        }
-        if (add != 0)
-        {
-            result.len++;
-            result.number[result.len] = add;
-        }
-        return result;
+        return c.set_sign(sign, 0);
     }
-    BigNumber operator-(const BigNumber __x)
+    inr operator*(const inr &b) const
     {
-        BigNumber a, b;
-        BigNumber result;
-        a = 0;
-        result = 0;
-        a.f = f;
-        a.len = len;
-        for (int i = 1; i <= len; i++)
-        {
-            a.number[i] = number[i];
-        }
-        b = __x;
-        int add;
-        add = 0;
-        ;
-        result.len = a.len > b.len ? a.len : b.len;
-        if (a.f == -1 && b.f == -1)
-        {
-            b.f = 1;
-            return a + b;
-        }
-        if (a.f == 1 && b.f == -1)
-        {
-            b.f = 1;
-            return a + b;
-        }
-        if (a.f == -1 && b.f == 1)
-        {
-            a.f = 1;
-            result = a + b;
-            result.f = -1;
-            return result;
-        }
-        if (a.f == 1 && b.f == 1)
-        {
-            result.f = 1;
-        }
-        if (a < b)
-        {
-            result.f = -1;
-            BigNumber c;
-            c = a;
-            a = b;
-            b = c;
-        }
-        for (int i = 1; i <= result.len; i++)
-        {
-            result.number[i] = a.number[i] - b.number[i] - add;
-            add = 0;
-            for (; result.number[i] < 0;)
-            {
-                result.number[i] += 10;
-                add++;
-            }
-        }
-        if (add != 0)
-        {
-            result.len++;
-            result.number[result.len] = -add;
-        }
-        for (; result.number[result.len] == 0 && result.len >= 2;)
-        {
-            result.len--;
-        }
-        if (result.len == 1 && result.number[len] == 0)
-        {
-            result.f = 1;
-        }
-        return result;
+        if (b < *this)
+            return b * *this;
+        inr c, d = b;
+        for (int i = 0; i < (int)v.size(); i++, d.v.insert(d.v.begin(), 0))
+            c.add_mul(d, v[i]);
+        return c.set_sign(sign * b.sign, 0);
     }
-    BigNumber operator*(const BigNumber __x)
+    inr operator/(const inr &b) const
     {
-        BigNumber a, b;
-        BigNumber result;
-        a = 0;
-        result = 0;
-        a.f = f;
-        a.len = len;
-        for (int i = 1; i <= len; i++)
+        inr c, d;
+        inr e = b;
+        e.sign = 1;
+
+        d.v.resize(v.size());
+        double db = 1.0 / (b.v.back() + (b.get_pos((unsigned)b.v.size() - 2) / 1e4) +
+                           (b.get_pos((unsigned)b.v.size() - 3) + 1) / 1e8);
+        for (int i = (int)v.size() - 1; i >= 0; i--)
         {
-            a.number[i] = number[i];
+            c.v.insert(c.v.begin(), v[i]);
+            int m = (int)((c.get_pos((int)e.v.size()) * 10000 + c.get_pos((int)e.v.size() - 1)) * db);
+            c = c - e * m, c.set_sign(c.sign, 0), d.v[i] += m;
+            while (!(c < e))
+                c = c - e, d.v[i] += 1;
         }
-        b = __x;
-        int add;
-        add = 0;
-        result.len = a.len + b.len;
-        if (a.f == -1 && b.f == -1)
-        {
-            result.f = -1;
-        }
-        if (a.f == -1 && b.f == 1)
-        {
-            a.f = 1;
-            return b - a;
-        }
-        if (a.f == 1 && b.f == -1)
-        {
-            b.f = 1;
-            return a - b;
-        }
-        if (a.f == 1 && b.f == 1)
-        {
-            result.f = 1;
-        }
-        for (int i = 1; i <= a.len; i++)
-        {
-            add = 0;
-            for (int j = 1; j <= b.len; j++)
-            {
-                result.number[i + j - 1] += a.number[i] * b.number[j] + add;
-                add = 0;
-                for (; result.number[i + j - 1] >= 10;)
-                {
-                    result.number[i + j - 1] -= 10;
-                    add++;
-                }
-            }
-            result.number[i + b.len] += add;
-        }
-        for (; result.number[result.len] == 0;)
-        {
-            result.len--;
-        }
-        return result;
+        return d.set_sign(sign * b.sign, 0);
+    }
+    inr operator%(const inr &b) const
+    {
+        return *this - *this / b * b;
+    }
+    bool operator>(const inr &b) const
+    {
+        return b < *this;
+    }
+    bool operator<=(const inr &b) const
+    {
+        return !(b < *this);
+    }
+    bool operator>=(const inr &b) const
+    {
+        return !(*this < b);
+    }
+    bool operator!=(const inr &b) const
+    {
+        return !(*this == b);
     }
 };
+} // namespace CodingOIer
 
-const int MaxN = 1e5 + 5;
-
-char a[MaxN];
-char b[MaxN];
-
-BigNumber x;
-BigNumber y;
-
+// ------------------------ Template End ------------------------
+constexpr int MaxN = 1e4 + 5;
+char s[MaxN];
 int main()
 {
-    scanf("%s", a);
-    scanf("%s", b);
-
-    x = a;
-    y = b;
-
-    (x + y).print();
-
+    CodingOIer::inr a, b;
+    scanf("%s", s);
+    a = s;
+    scanf("%s", s);
+    b = s;
+    a += b;
+    printf("%s\n", a.to_str().c_str());
     return 0;
 }
