@@ -1,7 +1,6 @@
 {
     "tasks": [
         {
-            "type": "cppbuild",
             "label": "C/C++: Clang++ Build C++ File",
             "command": "clang++",
             "args": [
@@ -15,9 +14,6 @@
             "options": {
                 "cwd": "${fileDirname}"
             },
-            "problemMatcher": [
-                "$gcc"
-            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
