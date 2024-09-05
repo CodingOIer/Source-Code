@@ -1,156 +1,81 @@
-/**
- * @Author: CodingOIer redefinition0726@163.com
- * @Date: 2024-02-01 16:54:33
- * @LastEditors: CodingOIer redefinition0726@163.com
- * @LastEditTime: 2024-02-01 17:23:04
- * @FilePath: \Source-Code\Luogu\P1967.cpp
- * @
- * @Copyright (c) 2024 by CodingOIer, All Rights Reserved.
- */
 #include <algorithm>
 #include <cstdio>
+#include <numeric>
+#include <tuple>
 #include <vector>
-constexpr int MaxN = 1e4 + 5;
-constexpr int MaxM = 5e4 + 5;
-class node
-{
-  public:
-    int from, to, max;
-    node(int x, int y, int z)
-    {
-        from = x;
-        to = y;
-        max = z;
-    }
-};
-int cnt;
+constexpr int MaxN = 1e5 + 5;
 int n, m, q;
-int f[MaxN];
-int id[MaxN];
-int fa[MaxN];
-int max[MaxN];
-int son[MaxN];
-int top[MaxN];
-int size[MaxN];
+int fd[MaxN];
+int up[MaxN];
 int depth[MaxN];
-int son_max[MaxN];
-int tree[MaxN * 4];
-std::vector<int> way[MaxN];
-std::vector<int> link[MaxN];
-std::vector<node> vector;
-void init(int n)
-{
-    for (int i = 1; i <= n; i++)
-    {
-        f[i] = i;
-    }
-}
+int jump[13][MaxN];
+int jump_min[13][MaxN];
+std::vector<std::tuple<int, int>> g[MaxN];
+std::vector<std::tuple<int, int, int>> links;
 int find(int x)
 {
-    if (f[x] != x)
+    return fd[x] == x ? x : fd[x] = find(fd[x]);
+}
+inline void merge(int x, int y)
+{
+    int fx, fy;
+    fx = find(x);
+    fy = find(y);
+    if (fx != fy)
     {
-        f[x] = find(f[x]);
+        fd[fx] = fy;
     }
-    return f[x];
 }
-void merge(int x, int y)
+void dfs(int u, int f, int l)
 {
-    f[find(y)] = find(x);
-}
-void dfsInformation(int x, int fat, int dep)
-{
-    fa[x] = fat;
-    size[x] = 1;
-    depth[x] = dep;
-    for (int i = 0; i < int(link[x].size()); i++)
+    up[u] = l;
+    depth[u] = depth[f] + 1;
+    jump[0][u] = f;
+    jump_min[0][u] = l;
+    for (int j = 1; j < 13; j++)
     {
-        int len = way[x][i];
-        int next = link[x][i];
-        if (next == fat)
+        jump[j][u] = jump[j - 1][jump[j - 1][u]];
+        jump_min[j][u] = std::min({jump_min[j - 1][u], jump_min[j - 1][jump[j - 1][u]], up[jump[j - 1][u]]});
+    }
+    for (auto [v, w] : g[u])
+    {
+        if (v == f)
         {
             continue;
         }
-        dfsInformation(next, x, dep + 1);
-        if (size[next] > size[son[x]])
-        {
-            son[x] = next;
-            son_max[x] = len;
-        }
+        dfs(v, u, w);
     }
 }
-void dfsSplit(int x, int tp, int len)
+int LCA(int x, int y)
 {
-    if (x == 0)
-    {
-        return;
-    }
-    top[x] = tp;
-    cnt++;
-    id[x] = cnt;
-    max[id[x]] = len;
-    dfsSplit(son[x], tp, son_max[x]);
-    for (int i = 0; i < int(link[x].size()); i++)
-    {
-        int next = link[x][i];
-        int len = way[x][i];
-        if (next == fa[x] || next == son[x])
-        {
-            continue;
-        }
-        dfsSplit(next, x, len);
-    }
-}
-void build(int cur, int s, int t)
-{
-    if (s == t)
-    {
-        tree[cur] = max[s];
-        return;
-    }
-    int mid = (s + t) / 2;
-    build(cur * 2, s, mid);
-    build(cur * 2 + 1, mid + 1, t);
-    tree[cur] = std::min(tree[cur * 2], tree[cur * 2 + 1]);
-}
-int query(int cur, int s, int t, int l, int r)
-{
-    if (l > r)
-    {
-        return 0x3f3f3f3f;
-    }
-    if (l <= s && t <= r)
-    {
-        return tree[cur];
-    }
-    int mid = (s + t) / 2;
-    int res = 0x3f3f3f3f;
-    if (s <= mid)
-    {
-        res = std::min(res, query(cur * 2, s, mid, l, r));
-    }
-    if (t > mid)
-    {
-        res = std::min(res, query(cur * 2 + 1, mid + 1, t, l, r));
-    }
-    return res;
-}
-int queryRoute(int x, int y)
-{
-    int res = 0x3f3f3f3f;
-    for (; top[x] != top[y];)
-    {
-        if (depth[top[x]] < depth[top[y]])
-        {
-            std::swap(x, y);
-        }
-        res = std::min(res, query(1, 1, n, id[top[x]], id[x]));
-        x = fa[top[x]];
-    }
-    if (depth[x] > depth[y])
+    int res = 0x7f7f7f7f;
+    if (depth[x] < depth[y])
     {
         std::swap(x, y);
     }
-    res = std::min(res, query(1, 1, n, id[x] + 1, id[y]));
+    for (int j = 12; j >= 0; j--)
+    {
+        if (depth[jump[j][x]] >= depth[y])
+        {
+            res = std::min(res, jump_min[j][x]);
+            x = jump[j][x];
+        }
+    }
+    for (int j = 12; j >= 0; j--)
+    {
+        if (jump[j][x] != jump[j][y])
+        {
+            res = std::min(res, jump_min[j][x]);
+            res = std::min(res, jump_min[j][y]);
+            x = jump[j][x];
+            y = jump[j][y];
+        }
+    }
+    if (x != y)
+    {
+        res = std::min(res, jump_min[0][x]);
+        res = std::min(res, jump_min[0][y]);
+    }
     return res;
 }
 int main()
@@ -160,27 +85,47 @@ int main()
     {
         int u, v, w;
         scanf("%d%d%d", &u, &v, &w);
-        vector.push_back(node(u, v, w));
+        links.push_back({u, v, w});
     }
-    std::sort(vector.begin(), vector.end(), [](const node &__x, const node &__y) { return __x.max > __y.max; });
-    for (node x : vector)
+    std::sort(links.begin(), links.end(),
+              [](const std::tuple<int, int, int> &x, const std::tuple<int, int, int> &y) -> bool {
+                  return std::get<2>(x) > std::get<2>(y);
+              });
+    std::iota(fd + 1, fd + 1 + n, 1);
+    for (auto [u, v, w] : links)
     {
-        if (find(x.from) == find(x.to))
+        if (find(u) == find(v))
         {
             continue;
         }
-        merge(x.from, x.to);
-        link[x.from].push_back(x.to);
-        way[x.from].push_back(x.max);
-        link[x.to].push_back(x.from);
-        way[x.to].push_back(x.max);
+        g[u].push_back({v, w});
+        g[v].push_back({u, w});
+        merge(u, v);
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        if (jump[0][i] != 0)
+        {
+            continue;
+        }
+        up[i] = 0x7f7f7f7f;
+        for (int j = 0; j < 13; j++)
+        {
+            jump[j][i] = i;
+            jump_min[j][i] = 0x7f7f7f7f;
+        }
+        depth[i] = 1;
+        for (auto [v, w] : g[i])
+        {
+            dfs(v, i, w);
+        }
     }
     scanf("%d", &q);
     for (int i = 1; i <= q; i++)
     {
         int u, v;
         scanf("%d%d", &u, &v);
-        printf("%d\n", queryRoute(u, v));
+        printf("%d\n", find(u) == find(v) ? LCA(u, v) : -1);
     }
     return 0;
 }
