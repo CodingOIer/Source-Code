@@ -16,7 +16,7 @@ bool check(int x, int g)
     still = more - g;
     if (still >= 0)
     {
-        if (x + still <= p[x])
+        if (x + still < p[x])
         {
             return false;
         }
@@ -48,7 +48,7 @@ int main()
         dp[i] = std::max(dp[i - 1], dp[std::max(0, i - p[i])] + 1);
     }
     int it = 0;
-    for (int i = 1; i <= n; i--)
+    for (int i = 1; i <= n; i++)
     {
         int l, r;
         l = 0;
@@ -57,10 +57,18 @@ int main()
         for (; l <= r;)
         {
             int mid = (l + r) / 2;
-            if (check(mid, i))
+            if (check(mid, i - 1))
             {
+                l = mid + 1;
+                res = mid;
             }
+            else
+            {
+                r = mid - 1;
+            }
+            res = mid;
         }
+        answer[i] = res;
     }
     scanf("%d", &q);
     for (int i = 1; i <= q; i++)
