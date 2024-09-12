@@ -186,7 +186,7 @@ struct inr // Copy from https://github.com/Baobaobear/MiniBigInteger/blob/main/b
 } // namespace COI
 
 // ------------------------ Template End ------------------------
-constexpr int MaxN = 1e4 + 5;
+constexpr int MaxN = 1e6 + 5;
 char s[MaxN];
 int main()
 {
@@ -195,7 +195,7 @@ int main()
     a = s;
     scanf("%s", s);
     b = s;
-    a += b;
+    a = a / b;
     printf("%s\n", a.to_str().c_str());
     return 0;
 }
