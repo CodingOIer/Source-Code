@@ -190,12 +190,20 @@ constexpr int MaxN = 1e4 + 5;
 char s[MaxN];
 int main()
 {
-    COI::inr a, b;
+    COI::inr a, b, c;
     scanf("%s", s);
     a = s;
     scanf("%s", s);
     b = s;
-    a += b;
-    printf("%s\n", a.to_str().c_str());
+    c = a + b;
+    printf("%s\n", c.to_str().c_str());
+    c = a - b;
+    printf("%s\n", c.to_str().c_str());
+    c = a * b;
+    printf("%s\n", c.to_str().c_str());
+    c = a / b;
+    printf("%s\n", c.to_str().c_str());
+    c = a % b;
+    printf("%s\n", c.to_str().c_str());
     return 0;
 }
