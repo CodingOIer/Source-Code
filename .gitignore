@@ -1,3 +1,7 @@
 .build
 .cph
 *.bin
+*.in
+*.out
+*.ans
+*.exe
