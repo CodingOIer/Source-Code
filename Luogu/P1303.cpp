@@ -195,7 +195,7 @@ int main()
     a = s;
     scanf("%s", s);
     b = s;
-    a += b;
+    a = a * b;
     printf("%s\n", a.to_str().c_str());
     return 0;
 }
