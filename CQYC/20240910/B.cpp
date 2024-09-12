@@ -37,7 +37,7 @@ bool check(int x, int g)
 }
 int main()
 {
-    scanf("%d", &n);
+    scanf("%d%d", &n, &q);
     for (int i = 1; i <= n; i++)
     {
         scanf("%d", &p[i]);
@@ -45,7 +45,11 @@ int main()
     std::sort(p + 1, p + 1 + n);
     for (int i = 1; i <= n; i++)
     {
-        dp[i] = std::max(dp[i - 1], dp[std::max(0, i - p[i])] + 1);
+        dp[i] = dp[i - 1];
+        if (i >= p[i])
+        {
+            dp[i] = std::max(dp[i], dp[i - p[i]] + 1);
+        }
     }
     int it = 0;
     for (int i = 1; i <= n; i++)
@@ -67,12 +71,11 @@ int main()
         }
         answer[i] = r;
     }
-    scanf("%d", &q);
     for (int i = 1; i <= q; i++)
     {
         int x;
         scanf("%d", &x);
-        printf("%d\n", answer[x]);
+        printf("%d ", answer[x]);
     }
     return 0;
 }
