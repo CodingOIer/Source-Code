@@ -1,59 +1,69 @@
-#include <algorithm>
 #include <cstdio>
+#include <cstring>
 #include <queue>
 #include <tuple>
-constexpr int MaxN = 5e5 + 5;
+constexpr int MaxN = 5e1 + 5;
 int n;
+int p[MaxN];
 int t[MaxN];
 long long k, d;
-long long p[MaxN];
-std::queue<std::tuple<long long, long long, long long>> temp;
-std::priority_queue<std::tuple<long long, long long, long long>> queue;
+long long rm[MaxN];
+long long dp[MaxN];
+std::priority_queue<std::tuple<long long, int, int>> best;
+std::priority_queue<std::tuple<long long, int>> queue[MaxN];
 int main()
 {
-    freopen("holiday.in", "r", stdin);
-    freopen("holiday.out", "w", stdout);
     scanf("%d%lld%lld", &n, &k, &d);
     for (int i = 1; i <= n; i++)
     {
-        scanf("%lld", &p[i]);
+        scanf("%d", &p[i]);
     }
     for (int i = 1; i <= n - 1; i++)
     {
         scanf("%d", &t[i]);
     }
-    queue.push({0, 1, 1});
-    long long best = -0x7f7f7f7f7f7f7f7f;
     for (int i = 1; i <= n; i++)
     {
-        best = -0x7f7f7f7f7f7f7f7f;
-        for (; !queue.empty() && temp.size() <= 1e2;)
+        if (i == 1)
         {
-            long long x;
-            long long last, pre;
-            std::tie(x, last, pre) = queue.top();
-            queue.pop();
-            if (last < i)
-            {
-                continue;
-            }
-            temp.push({x, last, pre});
-            if (x < best)
-            {
-                break;
-            }
-            x -= (i - pre) / k * d;
-            best = std::max(best, x);
+            dp[i] = 0;
         }
-        // fprintf(stderr, "Solve %d in %zu count.\n", i, temp.size());
-        best += p[i];
-        for (; !temp.empty();)
+        else
         {
-            queue.push(temp.front());
-            temp.pop();
+            std::queue<int> again;
+            for (; !best.empty();)
+            {
+                auto [x, y, z] = best.top();
+                if (y < i)
+                {
+                    again.push(z);
+                    best.pop();
+                }
+                else
+                {
+                    dp[i] = x + p[i];
+                    break;
+                }
+            }
+            for (; !again.empty();)
+            {
+                int x = again.front();
+                again.pop();
+                for (;;)
+                {
+                    auto [a, b] = queue[x].top();
+                    queue[x].pop();
+                    if (b >= i)
+                    {
+                        best.push({a - rm[x], b, x});
+                        break;
+                    }
+                }
+            }
         }
-        queue.push({best, i + t[i], i});
+        queue[i % k].push({dp[i] + rm[i % k], i + t[i]});
+        rm[i - k < 0 ? n + i - k : i - k] += d;
     }
-    printf("%lld\n", best);
+    printf("%lld\n", dp[n]);
     return 0;
 }
