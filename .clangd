@@ -3,3 +3,5 @@ CompileFlags:
     - "-DLOCAL"
     - "-Wall"
     - "-std=c++23"
+    - "-Wextra"
+    - "-Wpedantic"
