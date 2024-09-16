@@ -10,7 +10,10 @@
                 "-o",
                 "${workspaceFolder}/.build/${fileBasenameNoExtension}.exe",
                 "-std=c++17",
-                "-DLOCAL"
+                "-DLOCAL",
+                "-Wall",
+                "-Wextra",
+                "-Wpedantic"
             ],
             "options": {
                 "cwd": "${fileDirname}"
