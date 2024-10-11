@@ -1,14 +1,14 @@
 {
     "tasks": [
         {
-            "label": "C/C++: Clang++ Build C++ File",
+            "label": "Clang++ builds C++ executables",
             "command": "clang++",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
                 "-o",
-                "${workspaceFolder}/.build/${fileBasenameNoExtension}.exe",
+                "${workspaceFolder}/.build/${fileBasenameNoExtension}",
                 "-std=c++17",
                 "-DLOCAL",
                 "-Wall",
