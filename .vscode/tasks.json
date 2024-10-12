@@ -2,6 +2,7 @@
     "tasks": [
         {
             "label": "Clang++ builds C++ executables",
+            "type": "shell",
             "command": "clang++",
             "args": [
                 "-fdiagnostics-color=always",
@@ -22,7 +23,20 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Default Build Task"
+            "detail": "Default Build Task",
+            "dependsOn": [
+                "Create .build folder"
+            ]
+        },
+        {
+            "label": "Create .build folder",
+            "type": "shell",
+            "command": "mkdir",
+            "args": [
+                "-p",
+                ".build"
+            ],
+            "problemMatcher": []
         }
     ],
     "version": "2.0.0"
