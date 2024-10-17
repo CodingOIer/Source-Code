@@ -2,7 +2,6 @@
 #include <cstdio>
 #include <cstring>
 #include <functional>
-#include <map>
 #include <queue>
 #include <tuple>
 #include <vector>
@@ -11,12 +10,13 @@ int n;
 int fa[MaxN];
 int pre[MaxN];
 int depth[MaxN];
+int jump[20][MaxN];
+int ref[MaxN][MaxN];
 bool vis[MaxN];
+bool map[MaxN][MaxN];
 long long dis[MaxN];
 std::vector<int> tree[MaxN];
 std::vector<std::tuple<int, int>> g[MaxN];
-std::map<std::tuple<int, int>, int> ref;
-std::map<std::tuple<int, int>, bool> map;
 std::priority_queue<std::tuple<long long, int>, std::vector<std::tuple<long long, int>>, std::greater<>> queue;
 inline void Dijkstra(int u)
 {
@@ -48,6 +48,11 @@ inline void dfs(int u, int f)
 {
     fa[u] = f;
     depth[u] = depth[f] + 1;
+    jump[0][u] = f;
+    for (int i = 1; i < 12; i++)
+    {
+        jump[i][u] = jump[i - 1][jump[i - 1][u]];
+    }
     for (auto v : tree[u])
     {
         if (v == f)
@@ -59,21 +64,31 @@ inline void dfs(int u, int f)
 }
 inline int LCA(int x, int y)
 {
-    for (;;)
+    if (depth[x] <= depth[y])
     {
-        if (x == y)
+        std::swap(x, y);
+    }
+    for (int i = 11; i >= 0; i--)
+    {
+        if (depth[jump[i][x]] >= depth[y])
         {
-            return x;
-        }
-        if (depth[x] >= depth[y])
-        {
-            x = fa[x];
-        }
-        else
-        {
-            y = fa[y];
+            x = jump[i][x];
         }
     }
+    for (int i = 11; i >= 0; i--)
+    {
+        if (jump[i][x] != jump[i][y])
+        {
+            x = jump[i][x];
+            y = jump[i][y];
+        }
+    }
+    if (x != y)
+    {
+        x = jump[0][x];
+        y = jump[0][y];
+    }
+    return x;
 }
 int main()
 {
@@ -90,26 +105,27 @@ int main()
             }
             g[u].push_back({v, w});
             g[v].push_back({u, w});
-            ref[{u, v}] = w;
-            ref[{v, u}] = w;
+            ref[u][v] = w;
+            ref[v][u] = w;
         }
     }
     for (int i = 1; i <= n; i++)
     {
+        memset(jump, false, sizeof(jump));
         for (int i = 1; i <= n; i++)
         {
             tree[i].clear();
         }
         Dijkstra(i);
-        map.clear();
+        memset(map, false, sizeof(map));
         for (int j = 1; j <= n; j++)
         {
             if (i == j)
             {
                 continue;
             }
-            map[{pre[j], j}] = true;
-            map[{j, pre[j]}] = true;
+            map[pre[j]][j] = true;
+            map[j][pre[j]] = true;
             tree[pre[j]].push_back(j);
             tree[j].push_back(pre[j]);
         }
@@ -117,13 +133,13 @@ int main()
         long long answer = 0x3f3f3f3f3f3f3f3f;
         for (int j = 1; j <= n; j++)
         {
-            for (int k = 1; k <= n; k++)
+            for (int k = j + 1; k <= n; k++)
             {
-                if (j == k || map[{j, k}] || ref[{j, k}] == 0 || LCA(j, k) != i)
+                if (j == k || map[j][k] || ref[j][k] == 0 || LCA(j, k) != i)
                 {
                     continue;
                 }
-                answer = std::min(answer, 1ll * dis[j] + dis[k] + ref[{j, k}]);
+                answer = std::min(answer, 1ll * dis[j] + dis[k] + ref[j][k]);
             }
         }
         printf("%lld ", answer == 0x3f3f3f3f3f3f3f3f ? -1 : answer);
