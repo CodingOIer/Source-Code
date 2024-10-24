@@ -1,9 +1,7 @@
-#include <cstddef>
 #include <cstdio>
 #include <random>
 #include <utility>
 std::mt19937 rnd(std::random_device{}());
-constexpr int MaxN = 3e5 + 5;
 class node
 {
   public:

@@ -1,12 +1,3 @@
-/**
- * @Author: CodingOIer redefinition0726@163.com
- * @Date: 2024-01-29 14:40:44
- * @LastEditors: CodingOIer redefinition0726@163.com
- * @LastEditTime: 2024-01-29 16:27:37
- * @FilePath: \Source-Code\Luogu\B3717.cpp
- * @
- * @Copyright (c) 2024 by CodingOIer, All Rights Reserved.
- */
 #include <cstdio>
 constexpr int MaxN = 5e6 + 5;
 constexpr long long Mod = 998244353;

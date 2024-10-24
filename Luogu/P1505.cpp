@@ -9,7 +9,7 @@ int tree_sum[MaxN * 4];
 int tree_max[MaxN * 4];
 int tree_min[MaxN * 4];
 bool lazy[MaxN * 4];
-void downstream(int c, int s, int t)
+void downstream(int c)
 {
     if (lazy[c])
     {
@@ -49,7 +49,7 @@ void change(int c, int s, int t, int l, int r)
         lazy[c] ^= true;
         return;
     }
-    downstream(c, s, t);
+    downstream(c);
     int mid = (s + t) / 2;
     if (l <= mid)
     {
@@ -72,7 +72,7 @@ void change_single(int c, int s, int t, int w, int val)
         tree_min[c] = val;
         return;
     }
-    downstream(c, s, t);
+    downstream(c);
     int mid = (s + t) / 2;
     if (w <= mid)
     {
@@ -96,7 +96,7 @@ std::tuple<int, int, int> query(int c, int s, int t, int l, int r)
     {
         return {tree_sum[c], tree_max[c], tree_min[c]};
     }
-    downstream(c, s, t);
+    downstream(c);
     int mid = (s + t) / 2;
     int x, y, z;
     x = 0;
