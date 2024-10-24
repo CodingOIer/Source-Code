@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <cstdio>
 #include <random>
 #include <tuple>
@@ -53,6 +52,7 @@ std::pair<node *, node *> split(node *c, int v)
         c->update();
         return {c, temp.second};
     }
+    return {nullptr, nullptr};
 }
 std::tuple<node *, node *, node *> splitRank(node *c, int rk)
 {

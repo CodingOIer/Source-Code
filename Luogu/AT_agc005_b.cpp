@@ -519,7 +519,6 @@ struct Writer
 #define endl Fastio ::endl
 
 /* --------------- fast io --------------- */ // end
-const int MaxN = 2e5 + 5;
 class list
 {
   public:
@@ -534,7 +533,7 @@ list lists[MaxN];
 int main()
 {
     cin >> n;
-    for (register int i = 1; i <= n; i++)
+    for (int i = 1; i <= n; i++)
     {
         cin >> p[i];
         pos[p[i]] = i;
@@ -544,7 +543,7 @@ int main()
     }
     lists[0].next = 1;
     lists[n + 1].pre = n;
-    for (register int x = n; x >= 1; x--)
+    for (int x = n; x >= 1; x--)
     {
         int w;
         w = pos[x];

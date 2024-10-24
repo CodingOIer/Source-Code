@@ -1,7 +1,6 @@
 #include <cstdio>
 #include <set>
 #include <stack>
-constexpr int MaxN = 5e4 + 5;
 int n, m;
 std::set<int> set;
 std::stack<int> stack;

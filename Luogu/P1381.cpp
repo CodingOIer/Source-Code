@@ -1,7 +1,6 @@
 #include <cstdio>
 #include <map>
 #include <string>
-const int MaxN = 1e3 + 5;
 int n;
 char s[15];
 std::map<std::string, bool> map;

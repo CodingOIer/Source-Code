@@ -38,7 +38,7 @@ long long dfs(int u, long long f)
     {
         return f;
     }
-    for (int i = last[i]; i < int(link[u].size()); i++)
+    for (int i = last[u]; i < int(link[u].size()); i++)
     {
         last[u] = i;
         int v = link[u][i];
