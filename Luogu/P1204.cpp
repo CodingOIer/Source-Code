@@ -1,5 +1,4 @@
 #include <cstdio>
-const int MaxN = 5e3 + 5;
 const int MaxM = 1e6 + 5;
 int n;
 int l, r;
