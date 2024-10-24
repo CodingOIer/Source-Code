@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cstdio>
-#include <vector>
 const int MaxM = 1e5 + 5;
 const int MaxN = 1e3 + 5;
 class edge

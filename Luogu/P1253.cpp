@@ -20,7 +20,7 @@ void build(int c, int s, int t)
     build(c * 2 + 1, mid + 1, t);
     tree[c] = std::max(tree[c * 2], tree[c * 2 + 1]);
 }
-void downstreamChange(int c, int s, int t)
+void downstreamChange(int c)
 {
     if (lazy_change[c] != Diff)
     {
@@ -33,7 +33,7 @@ void downstreamChange(int c, int s, int t)
         lazy_change[c] = Diff;
     }
 }
-void downstreamAdd(int c, int s, int t)
+void downstreamAdd(int c)
 {
     if (lazy_add[c] != 0)
     {
@@ -58,10 +58,10 @@ void downstreamAdd(int c, int s, int t)
         lazy_add[c] = 0;
     }
 }
-void downstream(int c, int s, int t)
+void downstream(int c)
 {
-    downstreamChange(c, s, t);
-    downstreamAdd(c, s, t);
+    downstreamChange(c);
+    downstreamAdd(c);
 }
 void change(int c, int s, int t, int l, int r, long long v)
 {
@@ -72,7 +72,7 @@ void change(int c, int s, int t, int l, int r, long long v)
         lazy_change[c] = v;
         return;
     }
-    downstream(c, s, t);
+    downstream(c);
     int mid = (s + t) / 2;
     if (l <= mid)
     {
@@ -99,7 +99,7 @@ void add(int c, int s, int t, int l, int r, long long v)
         }
         return;
     }
-    downstream(c, s, t);
+    downstream(c);
     int mid = (s + t) / 2;
     if (l <= mid)
     {
@@ -117,7 +117,7 @@ long long query(int c, int s, int t, int l, int r)
     {
         return tree[c];
     }
-    downstream(c, s, t);
+    downstream(c);
     int mid = (s + t) / 2;
     long long res = -0x7f7f7f7f7f7f7f7f;
     if (l <= mid)

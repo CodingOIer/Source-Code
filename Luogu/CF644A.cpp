@@ -1,5 +1,4 @@
 #include <cstdio>
-constexpr int MaxN = 1e4 + 5;
 int n, a, b;
 int main()
 {
