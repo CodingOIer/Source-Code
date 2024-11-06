@@ -23,20 +23,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Default Build Task",
-            "dependsOn": [
-                "Create .build folder"
-            ]
-        },
-        {
-            "label": "Create .build folder",
-            "type": "shell",
-            "command": "mkdir",
-            "args": [
-                "-p",
-                ".build"
-            ],
-            "problemMatcher": []
+            "detail": "Default Build Task"
         }
     ],
     "version": "2.0.0"
