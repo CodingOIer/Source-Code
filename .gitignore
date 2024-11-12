@@ -1,7 +1,9 @@
 .build
 .cph
+*.ans
 *.bin
+*.exe
 *.in
 *.out
-*.ans
-*.exe
+*.txt
+__pycache__
