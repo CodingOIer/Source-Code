@@ -1,89 +1,45 @@
 #include <algorithm>
-#include <cmath>
 #include <cstdio>
-#include <set>
-#include <tuple>
+#include <random>
 #include <vector>
-constexpr int MaxN = 3e5 + 5;
-int block;
-int n, m, c;
+std::mt19937 rnd(std::random_device{}());
+constexpr int MaxN = 5e5 + 5;
+constexpr int MaxRandomTryCount = 30;
+int n, c, m;
 int p[MaxN];
-int have[MaxN];
-int answer[MaxN];
-std::multiset<std::tuple<int, int>> set;
-std::vector<std::tuple<int, int, int>> v;
+std::vector<int> v[MaxN];
 int main()
 {
     scanf("%d%d", &n, &c);
-    block = std::sqrt(n);
     for (int i = 1; i <= n; i++)
     {
         scanf("%d", &p[i]);
+        v[p[i]].push_back(i);
     }
     scanf("%d", &m);
     for (int i = 1; i <= m; i++)
     {
         int l, r;
         scanf("%d%d", &l, &r);
-        v.push_back({l, r, i});
-    }
-    std::sort(v.begin(), v.end(), [](const std::tuple<int, int, int> &x, const std::tuple<int, int, int> &y) -> bool {
-        return std::get<0>(x) / block == std::get<0>(y) / block
-                   ? (std::get<1>(x) == std::get<1>(y) ? false : std::get<0>(x) / block % 2 == 1) ^
-                         (std::get<1>(x) < std::get<1>(y))
-                   : std::get<0>(x) / block < std::get<0>(y) / block;
-    });
-    for (int i = 1; i <= c; i++)
-    {
-        set.insert({0, i});
-    }
-    int l, r;
-    l = r = 1;
-    set.erase(set.find({have[p[1]], p[1]}));
-    have[p[1]]++;
-    set.insert({have[p[1]], p[1]});
-    for (auto [wantL, wantR, id] : v)
-    {
-        for (; wantL < l;)
+        int answer = -1;
+        for (int _ = 1; _ <= MaxRandomTryCount; _++)
         {
-            l--;
-            set.erase(set.find({have[p[l]], p[l]}));
-            have[p[l]]++;
-            set.insert({have[p[l]], p[l]});
+            int color = p[rnd() % (r - l + 1) + l];
+            int cnt = std::upper_bound(v[color].begin(), v[color].end(), r) -
+                      std::lower_bound(v[color].begin(), v[color].end(), l);
+            if (cnt > (r - l + 1) / 2)
+            {
+                answer = color;
+                break;
+            }
         }
-        for (; r < wantR;)
-        {
-            r++;
-            set.erase(set.find({have[p[r]], p[r]}));
-            have[p[r]]++;
-            set.insert({have[p[r]], p[r]});
-        }
-        for (; l < wantL;)
-        {
-            set.erase(set.find({have[p[l]], p[l]}));
-            have[p[l]]--;
-            set.insert({have[p[l]], p[l]});
-            l++;
-        }
-        for (; wantR < r;)
-        {
-            set.erase(set.find({have[p[r]], p[r]}));
-            have[p[r]]--;
-            set.insert({have[p[r]], p[r]});
-            r--;
-        }
-        auto [cnt, cid] = *set.rbegin();
-        answer[id] = cnt > (r - l + 1) / 2 ? cid : -1;
-    }
-    for (int i = 1; i <= m; i++)
-    {
-        if (answer[i] == -1)
+        if (answer == -1)
         {
             printf("no\n");
         }
         else
         {
-            printf("yes %d\n", answer[i]);
+            printf("yes %d\n", answer);
         }
     }
     return 0;
