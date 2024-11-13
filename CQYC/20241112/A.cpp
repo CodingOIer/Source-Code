@@ -46,8 +46,6 @@ void dfsDownstream(int u, int f, int val)
 }
 int main()
 {
-    freopen("tree.in", "r", stdin);
-    freopen("tree.out", "w", stdout);
     scanf("%d", &n);
     for (int i = 1; i <= n - 1; i++)
     {
