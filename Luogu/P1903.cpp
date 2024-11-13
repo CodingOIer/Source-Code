@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstdio>
 #include <tuple>
@@ -7,17 +8,19 @@ constexpr int MaxN = 1e6 + 5;
 int n, m;
 int block;
 int p[MaxN];
+int b[MaxN];
 int have[MaxN];
 int answer[MaxN];
-std::vector<std::tuple<int, int>> change;
+std::vector<std::tuple<int, int, int>> change;
 std::vector<std::tuple<int, int, int, int>> v;
 int main()
 {
     scanf("%d%d", &n, &m);
-    block = std::sqrt(n);
+    block = pow(n, 2.0 / 3);
     for (int i = 1; i <= n; i++)
     {
         scanf("%d", &p[i]);
+        b[i] = p[i];
     }
     for (int i = 1; i <= m; i++)
     {
@@ -28,7 +31,8 @@ int main()
         {
             int x, y;
             scanf("%d%d", &x, &y);
-            change.push_back({x, y});
+            change.push_back({x, y, b[x]});
+            b[x] = y;
         }
         else
         {
@@ -80,23 +84,36 @@ int main()
         for (; cur < wantC;)
         {
             cur++;
-            int x, y;
-            std::tie(x, y) = change[cur - 1];
-            have[p[x]]--;
-            res -= have[p[x]] == 0 ? 1 : 0;
+            int x, y, z;
+            std::tie(x, y, z) = change[cur - 1];
+            if (l <= x && x <= r)
+            {
+                have[p[x]]--;
+                res -= have[p[x]] == 0 ? 1 : 0;
+            }
             p[x] = y;
-            have[p[x]]++;
-            res += have[p[x]] == 1 ? 1 : 0;
+            if (l <= x && x <= r)
+            {
+                have[p[x]]++;
+                res += have[p[x]] == 1 ? 1 : 0;
+            }
         }
         for (; wantC < cur;)
         {
+            int x, y, z;
+            std::tie(x, y, z) = change[cur - 1];
+            if (l <= x && x <= r)
+            {
+                have[p[x]]--;
+                res -= have[p[x]] == 0 ? 1 : 0;
+            }
+            p[x] = z;
+            if (l <= x && x <= r)
+            {
+                have[p[x]]++;
+                res += have[p[x]] == 1 ? 1 : 0;
+            }
             cur--;
-            int x, y;
-            std::tie(x, y) = change[cur - 1];
-            have[p[x]]--;
-            res -= have[p[x]] == 0 ? 1 : 0;
-            p[x] = y;
-            res += have[p[x]] == 1 ? 1 : 0;
         }
         answer[id] = res;
     }
