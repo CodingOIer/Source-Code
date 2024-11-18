@@ -17,7 +17,7 @@
 
 显然，对于 $i \in [1, n]$，第 $i$ 个数在**有可能**产生贡献的区间的长度是 $\lfloor \dfrac{n}{i}\rfloor$。
 
-即：$\lfloor \dfrac{n}{1} \rfloor + \lfloor \dfrac{n}{2} \rfloor + \lfloor \dfrac{n}{3} \rfloor + \dots + \lfloor \dfrac{n}{n} \rfloor = n \ln n$。（调和级数）
+即：$\sum_{i = 1}^{n} \dfrac{n}{i} = n \times H_{i} = n \ln n$（其中 $H$ 为调和级数，$H_n$ 约为 $n \ln n$）。
 
 显然，区间只有这么多，时间复杂度不可能高于这个。
 
