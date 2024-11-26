@@ -1,7 +1,9 @@
+If:
+  PathMatch: [.*\.cpp, .*\.cxx, .*\.cc, .*\.h, .*\.hpp, .*\.hxx]
 CompileFlags:
-  Add:
-    - "-DLOCAL"
-    - "-std=c++17"
-    - "-Wall"
-    - "-Wextra"
-    - "-Wpedantic"
+  Add: [-std=c++17, -Wall, -Wextra, -Wpedantic]
+---
+If:
+  PathMatch: [.*\.c]
+CompileFlags:
+  Add: [-std=c17]
