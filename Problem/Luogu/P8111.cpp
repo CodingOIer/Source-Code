@@ -31,21 +31,6 @@ std::pair<int, int> Guess(int n, int c)
     lr = rr = n;
     les = -1;
     res = -1;
-    int mid = getMid(ll, lr, n);
-    int r = want(vis, mid);
-    if (r == 0)
-    {
-        les = mid;
-        lr = mid - 1;
-    }
-    else if (r == 1)
-    {
-        lr = mid - 1;
-    }
-    else if (r == -1)
-    {
-        ll = mid + 1;
-    }
     for (; ll <= lr;)
     {
         int mid = getMid(ll, lr, n);
@@ -63,20 +48,6 @@ std::pair<int, int> Guess(int n, int c)
         {
             ll = mid + 1;
         }
-    }
-    r = want(vis, mid);
-    if (r == 0)
-    {
-        res = mid;
-        rl = mid + 1;
-    }
-    else if (r == -1)
-    {
-        rl = mid + 1;
-    }
-    else if (r == 1)
-    {
-        rr = mid - 1;
     }
     for (; rl <= rr;)
     {
