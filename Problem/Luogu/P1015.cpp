@@ -99,7 +99,7 @@ int getNum(char c)
     link['D'] = 13;
     link['E'] = 14;
     link['F'] = 15;
-    return link[c];
+    return link[int(c)];
 }
 int x;
 char s[MaxN];
