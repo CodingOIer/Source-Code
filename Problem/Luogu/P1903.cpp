@@ -45,7 +45,7 @@ int main()
               [](const std::tuple<int, int, int, int> &x, const std::tuple<int, int, int, int> &y) -> bool {
                   return std::get<0>(x) / block == std::get<0>(y) / block
                              ? (std::get<1>(x) / block == std::get<1>(y) / block
-                                    ? (std::get<2>(x) == std::get<2>(y) ? false : std::get<0>(x) / block % 2 == 1) ^
+                                    ? (std::get<2>(x) == std::get<2>(y) ? false : std::get<1>(x) / block % 2 == 1) ^
                                           (std::get<2>(x) < std::get<2>(y))
                                     : std::get<1>(x) / block < std::get<1>(y) / block)
                              : std::get<0>(x) / block < std::get<0>(y) / block;
