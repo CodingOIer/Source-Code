@@ -16,3 +16,5 @@
 - `Problem/Luogu-T`：洛谷团队题库
 - `Problem/Luogu-U`：洛谷用户题库
 - `Solution`：编写的题解
+- `Training`：集训时做的题，模拟赛
+- `Training/2024-12 Beijing Zhimahu` 2024 年 12 月北京知码狐集训
