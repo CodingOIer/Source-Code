@@ -206,8 +206,6 @@ void solve()
 }
 int main()
 {
-    freopen("detect.in", "r", stdin);
-    freopen("detect.out", "w", stdout);
     int t;
     scanf("%d", &t);
     for (int i = 1; i <= t; i++)
