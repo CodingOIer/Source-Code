@@ -1,5 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
+#include <map>
+#include <tuple>
 #include <utility>
 constexpr int MaxN = 2e1 + 5;
 int n, m;
@@ -14,6 +16,7 @@ bool dfs(int u)
     {
         return pre[n] == end;
     }
+    std::map<std::tuple<int, int>, bool> use;
     for (int i = 1; i <= m; i++)
     {
         if (vis[i])
@@ -24,6 +27,11 @@ bool dfs(int u)
         {
             std::swap(a[i], b[i]);
         }
+        if (use[{a[i], b[i]}])
+        {
+            continue;
+        }
+        use[{a[i], b[i]}] = true;
         if (a[i] == pre[u - 1])
         {
             pre[u] = b[i];
