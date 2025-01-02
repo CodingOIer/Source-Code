@@ -5,7 +5,7 @@
 
 // Constexpr Variable
 
-constexpr int TempAddrBegin = 14224;
+constexpr int TempAddrBegin = 102;
 constexpr int TRUE = TempAddrBegin - 2;
 constexpr int FALSE = TempAddrBegin - 1;
 
@@ -22,7 +22,9 @@ std::string addr(int x)
 
 int getTempAddr(int size = 1)
 {
-    return currTempAddr += size;
+    int r = currTempAddr;
+    currTempAddr += size;
+    return r;
 }
 
 std::vector<int> range(int l, int r, int step = 1)
@@ -199,6 +201,100 @@ void compare(std::vector<int> a, std::vector<int> b, int output)
     let(output, temp);
 }
 
+void andCore(std::vector<int> a, std::vector<int> b, std::vector<int> output)
+{
+    for (int i = 0; i < int(a.size()); i++)
+    {
+        let(output[i], AND({a[i], b[i]}));
+    }
+}
+
+void orCore(std::vector<int> a, std::vector<int> b, std::vector<int> output)
+{
+    for (int i = 0; i < int(a.size()); i++)
+    {
+        let(output[i], OR({a[i], b[i]}));
+    }
+}
+
+void xorCore(std::vector<int> a, std::vector<int> b, std::vector<int> output)
+{
+    for (int i = 0; i < int(a.size()); i++)
+    {
+        let(output[i], XOR({a[i], b[i]}));
+    }
+}
+
+void moveLeftCore(std::vector<int> a, std::vector<int> b, std::vector<int> output)
+{
+    int temp = getTempAddr(16);
+    std::vector<int> tempOut = range(temp, temp + 15);
+    temp = getTempAddr();
+    let(temp, FALSE);
+    for (; int(b.size()) > 4;)
+    {
+        temp = OR({temp, b.back()});
+        b.pop_back();
+    }
+    for (int i = 0; i < int(a.size()); i++)
+    {
+        int tempBegin = getTempAddr(16);
+        std::vector<int> tempVec = range(tempBegin, tempBegin + 15);
+        for (int j = 0; j < 16; j++)
+        {
+            if (i + j < 16)
+            {
+                let(tempVec[j], a[i + j]);
+            }
+            else
+            {
+                let(tempVec[j], FALSE);
+            }
+        }
+        choose(TRUE, b, tempVec, tempOut[i]);
+    }
+    temp = NOT(temp);
+    for (int i = 0; i < int(a.size()); i++)
+    {
+        let(output[i], AND({temp, tempOut[i]}));
+    }
+}
+
+void moveRightCore(std::vector<int> a, std::vector<int> b, std::vector<int> output)
+{
+    int temp = getTempAddr(16);
+    std::vector<int> tempOut = range(temp, temp + 15);
+    temp = getTempAddr();
+    let(temp, FALSE);
+    for (; int(b.size()) > 4;)
+    {
+        temp = OR({temp, b.back()});
+        b.pop_back();
+    }
+    for (int i = 0; i < int(a.size()); i++)
+    {
+        int tempBegin = getTempAddr(16);
+        std::vector<int> tempVec = range(tempBegin, tempBegin + 15);
+        for (int j = 0; j < 16; j++)
+        {
+            if (i - j >= 0)
+            {
+                let(tempVec[j], a[i - j]);
+            }
+            else
+            {
+                let(tempVec[j], FALSE);
+            }
+        }
+        choose(TRUE, b, tempVec, tempOut[i]);
+    }
+    temp = NOT(temp);
+    for (int i = 0; i < int(a.size()); i++)
+    {
+        let(output[i], AND({temp, tempOut[i]}));
+    }
+}
+
 void notCore(std::vector<int> a, std::vector<int> output)
 {
     for (int i = 0; i < int(a.size()); i++)
@@ -230,6 +326,57 @@ void reduceCore(std::vector<int> a, std::vector<int> b, std::vector<int> output)
 
 void alu(std::vector<int> op, std::vector<int> a, std::vector<int> b, std::vector<int> output)
 {
+    int temp = getTempAddr(16);
+    std::vector<int> addAnswer = range(temp, temp + 15);
+    temp = getTempAddr(16);
+    std::vector<int> reduceAnswer = range(temp, temp + 15);
+    temp = getTempAddr(16);
+    std::vector<int> andAnswer = range(temp, temp + 15);
+    temp = getTempAddr(16);
+    std::vector<int> orAnswer = range(temp, temp + 15);
+    temp = getTempAddr(16);
+    std::vector<int> xorAnswer = range(temp, temp + 15);
+    temp = getTempAddr(16);
+    std::vector<int> notAnswer = range(temp, temp + 15);
+    temp = getTempAddr(16);
+    std::vector<int> moveLeftAnswer = range(temp, temp + 15);
+    temp = getTempAddr(16);
+    std::vector<int> moveRightAnswer = range(temp, temp + 15);
+    addCore(a, b, addAnswer);
+    reduceCore(a, b, reduceAnswer);
+    andCore(a, b, andAnswer);
+    orCore(a, b, orAnswer);
+    xorCore(a, b, xorAnswer);
+    notCore(a, notAnswer);
+    temp = getTempAddr(16);
+    std::vector<int> bXor15 = range(temp, temp + 15);
+    for (int i = 0; i < int(b.size()); i++)
+    {
+        if (i < 4)
+        {
+            let(bXor15[i], XOR({TRUE, b[i]}));
+        }
+        else
+        {
+            let(bXor15[i], b[i]);
+        }
+    }
+    moveLeftCore(a, bXor15, moveLeftAnswer);
+    moveRightCore(a, bXor15, moveRightAnswer);
+    for (int i = 0; i < int(a.size()); i++)
+    {
+        int temp = getTempAddr(8);
+        std::vector<int> tempVec = range(temp, temp + 7);
+        let(tempVec[0], addAnswer[i]);
+        let(tempVec[1], reduceAnswer[i]);
+        let(tempVec[2], andAnswer[i]);
+        let(tempVec[3], orAnswer[i]);
+        let(tempVec[4], xorAnswer[i]);
+        let(tempVec[5], notAnswer[i]);
+        let(tempVec[6], moveLeftAnswer[i]);
+        let(tempVec[7], moveRightAnswer[i]);
+        choose(TRUE, op, tempVec, output[i]);
+    }
 }
 
 // Main Function
@@ -241,6 +388,7 @@ int main()
     // decode(1, range(2, 6), range(7, 38));
     // choose(1, range(2, 6), range(7, 38), 39);
     // compare(range(1, 16), range(17, 32), 33);
-    addCore(range(1, 16), range(17, 32), range(33, 48));
+    // addCore(range(1, 16), range(17, 32), range(33, 48));
+    alu(range(1, 3), range(4, 19), range(20, 35), range(36, 51));
     return 0;
 }
