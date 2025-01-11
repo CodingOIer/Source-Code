@@ -1,31 +1,34 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
-#include <map>
 #include <vector>
+constexpr int MaxN = 2e6 + 5;
+class node;
+node *dirRef[MaxN];
+int globalNodeId;
 class node
 {
   public:
+    int id;
     int len;
     node *link;
     node *ref[26];
     node()
     {
+        id = ++globalNodeId;
+        dirRef[id] = this;
         len = 0;
         link = nullptr;
     }
 };
-constexpr int MaxN = 1e2 + 5;
 int n;
 int size[MaxN];
 char s[MaxN];
+bool vis[MaxN];
 long long answer;
 node *root;
 node *last;
-node *dirRef[MaxN];
 std::vector<int> g[MaxN];
-std::map<node *, int> map;
-std::map<node *, bool> vis;
 void expand(char ch)
 {
     int id = ch - 'a';
@@ -42,6 +45,7 @@ void expand(char ch)
                 cur->link = root;
                 break;
             }
+            ptr = ptr->link;
             continue;
         }
         if (ptr->ref[id]->len == ptr->len + 1)
@@ -72,28 +76,18 @@ void expand(char ch)
     }
     last = cur;
 }
-int getId(node *cur)
-{
-    if (map.count(cur))
-    {
-        return map[cur];
-    }
-    map[cur] = map.size() + 1;
-    dirRef[map[cur]] = cur;
-    return map[cur];
-}
 void dfs(node *cur)
 {
-    if (vis[cur])
+    if (vis[cur->id])
     {
         return;
     }
-    vis[cur] = true;
+    vis[cur->id] = true;
     if (cur->link != nullptr)
     {
         int u, v;
-        u = getId(cur);
-        v = getId(cur->link);
+        u = cur->id;
+        v = cur->link->id;
         g[u].push_back(v);
         g[v].push_back(u);
     }
@@ -117,7 +111,10 @@ void calc(int u, int f)
         calc(v, u);
         size[u] += size[v];
     }
-    answer = std::max(answer, 1ll * size[u] * dirRef[u]->len);
+    if (size[u] >= 2)
+    {
+        answer = std::max(answer, 1ll * dirRef[u]->len * size[u]);
+    }
 }
 int main()
 {
@@ -129,7 +126,7 @@ int main()
         expand(s[i]);
     }
     dfs(root);
-    calc(getId(root), -1);
+    calc(root->id, 0);
     printf("%lld\n", answer);
     return 0;
 }
