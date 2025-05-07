@@ -14,7 +14,8 @@
                 "-DLOCAL",
                 "-Wall",
                 "-Wextra",
-                "-Wpedantic"
+                "-Wpedantic",
+		"-O0"
             ],
             "options": {
                 "cwd": "${fileDirname}"
