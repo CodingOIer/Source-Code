@@ -23,26 +23,31 @@ void expand(int c)
 {
     node *cur;
     cur = last;
-    node *p = new node;
-    p->len = last->len + 1;
-    last = p;
+    node *pNew = new node;
+    pNew->len = last->len + 1;
+    last = pNew;
     for (; cur != nullptr && cur->to[c] == 0; cur = cur->fa)
     {
-        cur->to[c] = p;
+        cur->to[c] = pNew;
     }
     if (cur == nullptr)
     {
-        p->fa = root;
+        pNew->fa = root;
         return;
     }
-    node *t = cur->to[c];
-    node *ct = new node;
-    (*ct) = (*t);
-    ct->len = cur->len + 1;
-    p->fa = t->fa = ct;
-    for (; cur != nullptr && cur->to[c] == t; cur = cur->fa)
+    node *pBefore = cur->to[c];
+    if (cur->len + 1 == pBefore->len)
     {
-        cur->to[c] = ct;
+        pNew->fa = pBefore;
+        return;
+    }
+    node *pClone = new node;
+    (*pClone) = (*pBefore);
+    pClone->len = cur->len + 1;
+    pNew->fa = pBefore->fa = pClone;
+    for (; cur != nullptr && cur->to[c] == pBefore; cur = cur->fa)
+    {
+        cur->to[c] = pClone;
     }
 }
 int main()
