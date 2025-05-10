@@ -31,20 +31,13 @@ constexpr int WJ = 4003; // 未结束
 int n, m;
 int role[MaxN];
 int jump[MaxN];
+int health[MaxN];
 char temp[105];
 bool dead[MaxN];
+bool combo[MaxN];
 std::vector<int> deck;
 std::vector<int> v[MaxN];
 std::vector<int>::iterator cardIt;
-
-// 函数声明
-
-char toChar(int);
-int discernCard(char);
-void initDeck();
-int getCard();
-void inPlay(int);
-int checkEnd();
 
 // 函数实现
 
@@ -137,8 +130,146 @@ int getCard()
     }
     return res;
 }
+int distance(int x, int y)
+{
+    int res = 0;
+    for (;;)
+    {
+        if (x == y)
+        {
+            break;
+        }
+        if (!dead[x])
+        {
+            res++;
+        }
+        x++;
+        if (x == n + 1)
+        {
+            x = 1;
+        }
+    }
+    return res;
+}
+std::vector<int>::iterator find(int id, int card)
+{
+    auto it = v[id].begin();
+    for (; it != v[id].end() && *it != card;)
+    {
+        it++;
+    }
+    return it;
+}
+bool have(int id, int card)
+{
+    return find(id, card) != v[id].end();
+}
+void jumpTo(int own, int ju)
+{
+    if (jump[own] == 0)
+    {
+        jump[own] = ju;
+    }
+}
+void putOut(int own, int card)
+{
+    v[own].erase(find(own, card));
+}
+bool wantPut(int own, int card)
+{
+    if (have(own, card))
+    {
+        putOut(own, card);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+std::vector<int> genPlay(int x)
+{
+    std::vector<int> v;
+    for (int i = 1; i <= n; i++)
+    {
+        if (!dead[i])
+        {
+            v.push_back(x);
+        }
+        x++;
+        if (x == n + 1)
+        {
+            x = 1;
+        }
+    }
+    return v;
+}
+void deadCheck(int own)
+{
+}
+void hurt(int own, int to, int x, bool mistake)
+{
+    health[to] -= x;
+    if (role[to] == MZ)
+    {
+        jumpTo(own, mistake ? LF : SF);
+    }
+    else
+    {
+        if (jump[to] == LF || jump[to] == SF)
+        {
+            jumpTo(own, SZ);
+        }
+        if (jump[to] == SZ)
+        {
+            jumpTo(own, SF);
+        }
+    }
+    deadCheck(to);
+}
+void kill(int own, int to)
+{
+    putOut(own, K);
+    if (have(to, D))
+    {
+        putOut(to, D);
+    }
+    else
+    {
+        hurt(own, to, 1, false);
+    }
+}
+void tryBestKill(int id, int to)
+{
+    if (combo[id])
+    {
+        for (; have(id, K);)
+        {
+            kill(id, to);
+        }
+    }
+    else
+    {
+        if (have(id, K))
+        {
+            kill(id, to);
+        }
+    }
+}
+void basicPlay(int id)
+{
+}
 void MZinPlay(int id)
 {
+}
+void ZZinPlay(int id)
+{
+}
+void FZinPlay(int id)
+{
+    if (distance(id, 1) <= 1)
+    {
+    }
 }
 void inPlay(int id)
 {
@@ -153,16 +284,16 @@ int checkEnd()
 {
     if (dead[1])
     {
-        return true;
+        return BE;
     }
     for (int i = 1; i <= n; i++)
     {
         if (role[i] == FZ && !dead[i])
         {
-            return false;
+            return WJ;
         }
     }
-    return true;
+    return GE;
 }
 
 // 主函数
@@ -172,6 +303,7 @@ int main()
     scanf("%d%d", &n, &m);
     for (int i = 1; i <= n; i++)
     {
+        health[i] = 4;
         scanf(" %s", temp);
         if (strcmp(temp, "MP") == 0)
         {
@@ -193,18 +325,20 @@ int main()
         }
     }
     initDeck();
-    for (;;)
+    dead[2] = true;
+    int end = checkEnd();
+    for (; end == WJ;)
     {
         for (int i = 1; i <= n; i++)
         {
             inPlay(i);
-        }
-        if (checkEnd() != WJ)
-        {
-            break;
+            end = checkEnd();
+            if (end != WJ)
+            {
+                break;
+            }
         }
     }
-    int end = checkEnd();
     if (end == GE)
     {
         printf("MP\n");
@@ -221,6 +355,10 @@ int main()
         }
         else
         {
+            for (int j = 0; j < int(v[i].size()); j++)
+            {
+                printf("%c%c", toChar(v[i][j]), j == int(v[i].size()) - 1 ? '\n' : ' ');
+            }
         }
     }
     return 0;
