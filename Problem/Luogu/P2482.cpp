@@ -5,6 +5,8 @@ constexpr int MaxN = 1e2 + 5;
 
 // 常量
 
+constexpr int MID = 1; // 主猪 ID
+
 constexpr int K = 1001; // 杀
 constexpr int D = 1002; // 闪
 constexpr int P = 1003; // 桃
@@ -32,6 +34,7 @@ int n, m;
 int role[MaxN];
 int jump[MaxN];
 int health[MaxN];
+int lastHurt[MaxN];
 char temp[105];
 bool dead[MaxN];
 bool combo[MaxN];
@@ -187,7 +190,7 @@ bool wantPut(int own, int card)
         return false;
     }
 }
-std::vector<int> genPlay(int x)
+std::vector<int> genPlayer(int x)
 {
     std::vector<int> v;
     for (int i = 1; i <= n; i++)
@@ -204,8 +207,82 @@ std::vector<int> genPlay(int x)
     }
     return v;
 }
+int checkEnd()
+{
+    if (dead[MID])
+    {
+        return BE;
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        if (role[i] == FZ && !dead[i])
+        {
+            return WJ;
+        }
+    }
+    return GE;
+}
+void endGame(int end)
+{
+    if (end == GE)
+    {
+        printf("MP\n");
+    }
+    else if (end == BE)
+    {
+        printf("FP\n");
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        if (dead[i])
+        {
+            printf("DEAD\n");
+        }
+        else
+        {
+            for (int j = 0; j < int(v[i].size()); j++)
+            {
+                printf("%c%c", toChar(v[i][j]), j == int(v[i].size()) - 1 ? '\n' : ' ');
+            }
+        }
+    }
+}
 void deadCheck(int own)
 {
+    if (health[own] <= 0)
+    {
+        for (const auto &x : genPlayer(own))
+        {
+            for (; health[own] <= 0 && wantPut(x, P);)
+            {
+                health[own]++;
+            }
+            if (health[own] >= 1)
+            {
+                break;
+            }
+        }
+        if (health[own] <= 0)
+        {
+            dead[own] = true;
+            int end = checkEnd();
+            if (end != WJ)
+            {
+                endGame(end);
+            }
+            if (role[own] == ZZ && lastHurt[own] == MID)
+            {
+                v[MID].clear();
+                combo[MID] = false;
+            }
+            else if (role[own] == FZ)
+            {
+                v[lastHurt[own]].push_back(getCard());
+                v[lastHurt[own]].push_back(getCard());
+                v[lastHurt[own]].push_back(getCard());
+            }
+        }
+    }
 }
 void hurt(int own, int to, int x, bool mistake)
 {
@@ -225,6 +302,7 @@ void hurt(int own, int to, int x, bool mistake)
             jumpTo(own, SF);
         }
     }
+    lastHurt[to] = own;
     deadCheck(to);
 }
 void kill(int own, int to)
@@ -256,18 +334,70 @@ void tryBestKill(int id, int to)
         }
     }
 }
-void basicPlay(int id)
+bool wantShield(int own, int to)
+{
+    if (own == MZ)
+    {
+        if (jump[to] == ZZ || own == to)
+        {
+            return wantPut(own, J);
+        }
+        return false;
+    }
+    if (own == ZZ)
+    {
+        if (to == MID || jump[to] == ZZ)
+        {
+            return wantPut(own, J);
+        }
+        return false;
+    }
+    if (own == FZ)
+    {
+        if (jump[to] == FZ)
+        {
+            return wantPut(own, J);
+        }
+        return false;
+    }
+    return false;
+}
+void askShield(int own)
+{
+    for (const auto &x : genPlayer(own))
+    {
+    }
+}
+void checkN(int own)
 {
 }
-void MZinPlay(int id)
+void basicPlay(int own)
+{
+    for (; health[own] <= 3 && wantPut(own, P);)
+    {
+        health[own]++;
+    }
+    for (; wantPut(own, Z);)
+    {
+        combo[own] = true;
+    }
+    for (; wantPut(own, N);)
+    {
+        checkN(own);
+    }
+    for (; wantPut(own, W);)
+    {
+    }
+}
+void MZinPlay(int own)
 {
 }
-void ZZinPlay(int id)
+void ZZinPlay(int own)
 {
 }
-void FZinPlay(int id)
+void FZinPlay(int own)
 {
-    if (distance(id, 1) <= 1)
+    if (distance(own, MID) <= 1)
     {
     }
 }
@@ -275,25 +405,11 @@ void inPlay(int id)
 {
     if (dead[id])
     {
+        printf("NOT\n");
         return;
     }
     v[id].push_back(getCard());
     v[id].push_back(getCard());
-}
-int checkEnd()
-{
-    if (dead[1])
-    {
-        return BE;
-    }
-    for (int i = 1; i <= n; i++)
-    {
-        if (role[i] == FZ && !dead[i])
-        {
-            return WJ;
-        }
-    }
-    return GE;
 }
 
 // 主函数
@@ -329,36 +445,9 @@ int main()
     int end = checkEnd();
     for (; end == WJ;)
     {
-        for (int i = 1; i <= n; i++)
+        for (const auto &i : genPlayer(MID))
         {
             inPlay(i);
-            end = checkEnd();
-            if (end != WJ)
-            {
-                break;
-            }
-        }
-    }
-    if (end == GE)
-    {
-        printf("MP\n");
-    }
-    else if (end == BE)
-    {
-        printf("FP\n");
-    }
-    for (int i = 1; i <= n; i++)
-    {
-        if (dead[i])
-        {
-            printf("DEAD\n");
-        }
-        else
-        {
-            for (int j = 0; j < int(v[i].size()); j++)
-            {
-                printf("%c%c", toChar(v[i][j]), j == int(v[i].size()) - 1 ? '\n' : ' ');
-            }
         }
     }
     return 0;
