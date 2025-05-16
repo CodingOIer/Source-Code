@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cstdio>
-#include <map>
 #include <tuple>
 #include <vector>
 constexpr int MaxN = 1e4 + 5;
@@ -8,19 +7,19 @@ int n, m;
 int k[MaxN];
 int size[MaxN];
 bool vis[MaxN];
-std::vector<int> vk;
+bool answer[MaxN];
+std::vector<std::tuple<int, int>> res;
 std::vector<std::tuple<int, int>> g[MaxN];
-std::map<int, bool> answer;
 void calcSize(int u, int f)
 {
-    if (vis[u] && f != 0)
+    if (vis[u])
     {
         return;
     }
     size[u] = 1;
     for (const auto &[v, w] : g[u])
     {
-        if (v == f)
+        if (v == f || vis[v])
         {
             continue;
         }
@@ -28,15 +27,19 @@ void calcSize(int u, int f)
         size[u] += size[v];
     }
 }
-int findRoot(int u, int f, int sizeAll, int &root, int &best)
+void findRoot(int u, int f, int sizeAll, int &root, int &best)
 {
     if (vis[u])
     {
-        return -1;
+        return;
     }
     int most = sizeAll - size[u];
     for (const auto &[v, w] : g[u])
     {
+        if (v == f || vis[v])
+        {
+            continue;
+        }
         most = std::max(most, size[v]);
     }
     if (most < best)
@@ -50,63 +53,85 @@ int findRoot(int u, int f, int sizeAll, int &root, int &best)
         {
             continue;
         }
-        int res = findRoot(v, u, sizeAll, root, best);
-        if (res != -1)
-        {
-            return res;
-        }
+        findRoot(v, u, sizeAll, root, best);
     }
-    return -1;
 }
-const std::vector<int> calcDis(int u, int f)
+void calcDis(int u, int f, int root, int dis)
 {
     if (vis[u])
     {
-        return {};
+        return;
     }
-    std::vector<int> res = {0};
+    res.push_back({dis, root});
     for (const auto &[v, w] : g[u])
     {
         if (v == f)
         {
             continue;
         }
-        for (const auto &val : calcDis(v, u))
-        {
-            res.push_back(val + w);
-        }
+        calcDis(v, u, root, dis + w);
     }
-    std::sort(res.begin(), res.end());
-    res.erase(std::unique(res.begin(), res.end()), res.end());
-    return res;
 }
 void solve(int u)
 {
     vis[u] = true;
-    calcSize(u, 0);
-    std::map<int, bool> have;
-    have[0] = true;
     for (const auto &[v, w] : g[u])
     {
-        auto ve = calcDis(v, u);
-        for (const auto &target : vk)
+        calcDis(v, u, v, w);
+    }
+    res.push_back({0, -1});
+    std::sort(res.begin(), res.end());
+    for (int i = 1; i <= m; i++)
+    {
+        if (answer[i])
         {
-            for (const auto &val : ve)
+            continue;
+        }
+        auto itl = res.begin();
+        auto itr = res.end();
+        itr--;
+        for (; itl < itr;)
+        {
+            int c = std::get<0>(*itl) + std::get<0>(*itr);
+            if (c < k[i])
             {
-                int c = target - (val + w);
-                if (c >= 0 && have[c])
+                itl++;
+            }
+            else if (c > k[i])
+            {
+                itr--;
+            }
+            else if (c == k[i])
+            {
+                if (std::get<1>(*itl) == std::get<1>(*itr))
                 {
-                    answer[target] = true;
+                    auto cp = itl;
+                    cp++;
+                    if (std::get<0>(*cp) == std::get<0>(*itl))
+                    {
+                        itl++;
+                    }
+                    else
+                    {
+                        itr--;
+                    }
+                }
+                else
+                {
+                    answer[i] = true;
+                    break;
                 }
             }
         }
-        for (const auto &val : ve)
-        {
-            have[val + w] = true;
-        }
     }
+    res.clear();
     for (const auto &[v, w] : g[u])
     {
+        if (vis[v])
+        {
+            continue;
+        }
+        calcSize(v, u);
         int root, best;
         root = -1;
         best = 0x3f3f3f3f;
@@ -130,7 +155,6 @@ int main()
     for (int i = 1; i <= m; i++)
     {
         scanf("%d", &k[i]);
-        vk.push_back(k[i]);
     }
     calcSize(1, 0);
     int root, best;
@@ -140,7 +164,7 @@ int main()
     solve(root);
     for (int i = 1; i <= m; i++)
     {
-        printf("%s\n", answer[k[i]] ? "AYE" : "NAY");
+        printf("%s\n", answer[i] ? "AYE" : "NAY");
     }
     return 0;
 }
