@@ -1,6 +1,5 @@
 #include <cstdio>
 #include <set>
-const int MaxN = 5e4 + 5;
 int t;
 int n;
 int x;
