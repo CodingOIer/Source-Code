@@ -8,8 +8,8 @@
 
 - `.github`: GitHub 配置文件，Actions 等等。
 - `.vscode`: VSCode 配置文件，使用 Clangd 作为 LSP，CodeLLDB 作为调试器。
-- `Contest`：洛谷、AtCoder、Codeforces、Universal Cup 等比赛的代码
-- `CQYC`：在 CQYC 的考试改题情况（见谅）
+- `Contest`：洛谷、AtCoder、Codeforces、Universal Cup 等比赛的代码。
+- `CQYC`：在 CQYC 的考试改题情况。（见谅）
 - `Problem`：在各大 OJ 完成的题目。
-- `Solution`：编写的题解
-- `Training`：集训时做的题，模拟赛
+- `Solution`：编写的题解。
+- `Training`：集训时做的题，模拟赛。
