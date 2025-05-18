@@ -5,6 +5,9 @@ on:
     - cron: '0 0 * * *' # 每天 UTC 0:00 对应北京时间 8:00
   workflow_dispatch: # 允许手动触发
 
+permissions:
+  contents: write
+
 jobs:
   update-readme:
     runs-on: ubuntu-latest
