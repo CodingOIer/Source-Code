@@ -15,11 +15,29 @@ jobs:
       - name: 检出代码库
         uses: actions/checkout@v4
 
-      - name: 统计代码行数和字符数
+      - name: 统计并格式化各项数据
         run: |
-          lines=$(find . -type f -name "*.py" -o -name "*.js" -o -name "*.md" -o -name "*.cpp" -o -name "*.java" | xargs wc -l | awk '{s+=$1} END {print s}')
-          chars=$(find . -type f -name "*.py" -o -name "*.js" -o -name "*.md" -o -name "*.cpp" -o -name "*.java" | xargs wc -m | awk '{s+=$1} END {print s}')
-          sed -e "s/{line}/$lines/" -e "s/{char}/$chars/" README.template.md > README.md
+          # 统计原始数据
+          lines=$(find . -type f \( -name "*.py" -o -name "*.js" -o -name "*.md" -o -name "*.cpp" -o -name "*.java" \) | xargs wc -l | awk '{s+=$1} END {print s}')
+          chars=$(find . -type f \( -name "*.py" -o -name "*.js" -o -name "*.md" -o -name "*.cpp" -o -name "*.java" \) | xargs wc -m | awk '{s+=$1} END {print s}')
+          main_count=$(grep -RHo 'int main' . | wc -l)
+          var_count=$(grep -RHoE '\b(int|long long|double|auto|vector|queue)\b' . | wc -l)
+
+          # 千分位格式化函数
+          fmt(){ echo "$1" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta'; }
+
+          # 格式化输出
+          f_lines=$(fmt "$lines")
+          f_chars=$(fmt "$chars")
+          f_main=$(fmt "$main_count")
+          f_var=$(fmt "$var_count")
+
+          # 替换模板
+          sed -e "s/{line}/$f_lines/" \
+              -e "s/{char}/$f_chars/" \
+              -e "s/{main}/$f_main/" \
+              -e "s/{var}/$f_var/" \
+              README.template.md > README.md
 
       - name: 提交更新
         run: |
