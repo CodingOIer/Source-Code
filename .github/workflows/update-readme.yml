@@ -21,7 +21,7 @@ jobs:
           lines=$(find . -type f \( -name "*.py" -o -name "*.js" -o -name "*.md" -o -name "*.cpp" -o -name "*.java" \) | xargs wc -l | awk '{s+=$1} END {print s}')
           chars=$(find . -type f \( -name "*.py" -o -name "*.js" -o -name "*.md" -o -name "*.cpp" -o -name "*.java" \) | xargs wc -m | awk '{s+=$1} END {print s}')
           main_count=$(grep -RHo 'int main' . | wc -l)
-          var_count=$(grep -RHoE '\b(int|long long|double|auto|vector|queue|string|class|struct|void)\b' . | wc -l)
+          var_count=$(grep -RHoE '\b(int|long long|double|auto|std::vector|std::queue|std::string|std::tuple|std::priority_queue|class|struct|void)\b' . | wc -l)
 
           # 千分位格式化函数
           fmt(){ echo "$1" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta'; }
