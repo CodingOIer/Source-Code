@@ -19,7 +19,7 @@ void init(char *s)
             {
                 to[i][j] = i + 1;
             }
-            else if (i <= m)
+            else
             {
                 to[i][j] = to[last][j];
             }
