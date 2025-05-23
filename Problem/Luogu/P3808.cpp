@@ -1,7 +1,6 @@
 #include <cstdio>
 #include <cstring>
 #include <queue>
-#include <vector>
 class node
 {
   public:
@@ -12,6 +11,7 @@ class node
     node *to[26];
     node()
     {
+        end = 0;
         by = '\0';
         fa = nullptr;
         fail = nullptr;
