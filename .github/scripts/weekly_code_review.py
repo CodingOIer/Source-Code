@@ -14,7 +14,7 @@ def get_commit_details():
         'git', 'log',
         '--since', start_date.strftime('%Y-%m-%d'),
         '--until', end_date.strftime('%Y-%m-%d'),
-        '--pretty=format:%H%n%s%n%cd',
+        '--pretty=format:%H%n%s%n%cd%n%an',
         '--name-only',
         '--date=short'
     ]
@@ -39,6 +39,9 @@ def get_commit_details():
         # 日期行
         elif 'date' not in current_commit:
             current_commit['date'] = line
+        # 作者行
+        elif 'author' not in current_commit:
+            current_commit['author'] = line
         # 文件行
         else:
             if line and os.path.exists(line):
@@ -80,6 +83,7 @@ def generate_deepseek_comment(commit_data):
         )
         commit_details.append(
             f"Commit: {commit['id']}\n"
+            f"作者: {commit['author']}\n"
             f"日期: {commit['date']}\n"
             f"消息: {commit['message']}\n"
             f"修改内容:\n{files_content}\n"
