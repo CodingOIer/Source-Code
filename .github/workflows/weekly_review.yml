@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch to run on'
+        description: 'Branch to run on (e.g. llm, master)'
         required: false
-        default: 'master'
+        default: ${{ github.ref_name }}
 
 jobs:
   review:
