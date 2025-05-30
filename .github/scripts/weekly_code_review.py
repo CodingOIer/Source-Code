@@ -43,7 +43,7 @@ def get_commit_details():
         else:
             if line and os.path.exists(line):
                 # 获取文件diff
-                cmd_diff = ['git', 'diff', f"{commit['id']}^..{commit['id']}", '--', line]
+                cmd_diff = ['git', 'diff', f"{current_commit['id']}^..{current_commit['id']}", '--', line]
                 diff_result = subprocess.run(cmd_diff, capture_output=True, text=True)
                 if diff_result.returncode == 0:
                     diff_content = diff_result.stdout
