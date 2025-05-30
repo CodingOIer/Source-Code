@@ -4,47 +4,59 @@ import requests
 from datetime import datetime, timedelta
 
 def get_commit_details():
-    """获取详细的commit信息"""
+    """获取按commit组织的详细信息"""
     end_date = datetime.now()
     start_date = end_date - timedelta(days=7)
     time_range = f"{start_date.strftime('%Y-%m-%d')} 至 {end_date.strftime('%Y-%m-%d')}"
     
-    # 获取修改的文件列表
-    cmd_files = [
+    # 获取完整commit信息
+    cmd = [
         'git', 'log',
         '--since', start_date.strftime('%Y-%m-%d'),
         '--until', end_date.strftime('%Y-%m-%d'),
+        '--pretty=format:%H%n%s%n%cd',
         '--name-only',
-        '--pretty=format:'
+        '--date=short'
     ]
-    files_result = subprocess.run(cmd_files, capture_output=True, text=True)
-    files = set(files_result.stdout.splitlines())
+    result = subprocess.run(cmd, capture_output=True, text=True)
     
-    # 获取commit消息
-    cmd_messages = [
-        'git', 'log',
-        '--since', start_date.strftime('%Y-%m-%d'),
-        '--until', end_date.strftime('%Y-%m-%d'),
-        '--pretty=format:%s'
-    ]
-    messages_result = subprocess.run(cmd_messages, capture_output=True, text=True)
-    commit_messages = messages_result.stdout.splitlines()
+    commits = []
+    current_commit = {}
+    for line in result.stdout.splitlines():
+        if not line:
+            continue
+        # Commit ID行
+        if len(line) == 40 and all(c in '0123456789abcdef' for c in line):
+            if current_commit:
+                commits.append(current_commit)
+            current_commit = {
+                'id': line,
+                'files': []
+            }
+        # Commit消息行
+        elif 'message' not in current_commit:
+            current_commit['message'] = line
+        # 日期行
+        elif 'date' not in current_commit:
+            current_commit['date'] = line
+        # 文件行
+        else:
+            if line and os.path.exists(line):
+                try:
+                    with open(line, 'r') as f:
+                        content = f.read()
+                        current_commit['files'].append({
+                            'path': line,
+                            'content': content[:1000] + '...' if len(content) > 1000 else content
+                        })
+                except:
+                    continue
     
-    # 获取代码修改内容
-    code_changes = []
-    for file in files:
-        if file and os.path.exists(file):
-            try:
-                with open(file, 'r') as f:
-                    content = f.read()
-                    code_changes.append(f"{file}:\n{content[:1000]}...")  # 每文件最多1000字符
-            except:
-                continue
+    if current_commit:
+        commits.append(current_commit)
     
     return {
-        'files': [f for f in files if f and os.path.exists(f)],
-        'commit_messages': commit_messages,
-        'code_changes': code_changes,
+        'commits': commits,
         'time_range': time_range
     }
 
@@ -59,16 +71,23 @@ def generate_deepseek_comment(commit_data):
     with open(os.path.join(os.path.dirname(__file__), 'prompt.md'), 'r') as f:
         prompt_template = f.read()
     
-    # 准备数据
-    file_list = '\n'.join(commit_data['files'])
-    code_changes = '\n\n'.join(commit_data['code_changes'])
-    commit_messages = '\n'.join(commit_data['commit_messages'])
+    # 按commit组织数据
+    commit_details = []
+    for commit in commit_data['commits']:
+        files_content = '\n'.join(
+            f"{file['path']}:\n{file['content']}"
+            for file in commit['files']
+        )
+        commit_details.append(
+            f"Commit: {commit['id']}\n"
+            f"日期: {commit['date']}\n"
+            f"消息: {commit['message']}\n"
+            f"修改内容:\n{files_content}\n"
+        )
     
     # 填充模板
     prompt = prompt_template.format(
-        file_list=file_list,
-        code_changes=code_changes,
-        commit_messages=commit_messages,
+        commits_details='\n\n'.join(commit_details),
         time_range=commit_data['time_range']
     )
     
@@ -89,11 +108,22 @@ def generate_deepseek_comment(commit_data):
     response.raise_for_status()
     return response.json()["choices"][0]["message"]["content"]
 
+def update_readme(comment):
+    """更新README文件"""
+    with open('README.template.md', 'r') as f:
+        template = f.read()
+    
+    readme_content = template.replace('{LLM}', comment)
+    
+    with open('README.md', 'w') as f:
+        f.write(readme_content)
+
 if __name__ == "__main__":
     commit_data = get_commit_details()
-    if not commit_data['files']:
+    if not commit_data['commits']:
         print("本周没有代码修改")
         exit()
     
     comment = generate_deepseek_comment(commit_data)
     print(f"代码审查结果:\n{comment}")
+    update_readme(comment)
