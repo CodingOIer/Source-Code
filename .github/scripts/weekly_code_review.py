@@ -42,15 +42,15 @@ def get_commit_details():
         # 文件行
         else:
             if line and os.path.exists(line):
-                try:
-                    with open(line, 'r') as f:
-                        content = f.read()
-                        current_commit['files'].append({
-                            'path': line,
-                            'content': content[:1000] + '...' if len(content) > 1000 else content
-                        })
-                except:
-                    continue
+                # 获取文件diff
+                cmd_diff = ['git', 'diff', f"{commit['id']}^..{commit['id']}", '--', line]
+                diff_result = subprocess.run(cmd_diff, capture_output=True, text=True)
+                if diff_result.returncode == 0:
+                    diff_content = diff_result.stdout
+                    current_commit['files'].append({
+                        'path': line,
+                        'diff': diff_content[:1000] + '...' if len(diff_content) > 1000 else diff_content
+                    })
     
     if current_commit:
         commits.append(current_commit)
@@ -75,7 +75,7 @@ def generate_deepseek_comment(commit_data):
     commit_details = []
     for commit in commit_data['commits']:
         files_content = '\n'.join(
-            f"{file['path']}:\n{file['content']}"
+            f"{file['path']}:\n{file['diff']}"
             for file in commit['files']
         )
         commit_details.append(
