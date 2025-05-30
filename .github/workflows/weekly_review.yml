@@ -8,7 +8,7 @@ on:
       branch:
         description: 'Branch to run on (e.g. llm, master)'
         required: false
-        default: ${{ github.ref_name }}
+        default: 'master'
 
 jobs:
   review:
