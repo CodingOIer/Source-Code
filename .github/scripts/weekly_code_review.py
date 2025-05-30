@@ -1,7 +1,7 @@
 import os
 import subprocess
+import requests
 from datetime import datetime, timedelta
-from deepseek_api import DeepSeek  # 假设使用DeepSeek官方库
 
 def get_weekly_commits():
     """获取最近一周的commit记录"""
@@ -21,7 +21,10 @@ def get_weekly_commits():
 
 def generate_deepseek_comment(files):
     """调用DeepSeek生成代码评论"""
-    client = DeepSeek(api_key=os.getenv('DEEPSEEK_API_KEY'))
+    headers = {
+        "Authorization": f"Bearer {os.getenv('DEEPSEEK_API_KEY')}",
+        "Content-Type": "application/json"
+    }
     
     prompt = f"""请用幽默风趣的中文点评以下代码文件：
 {'\n'.join(files)}
@@ -31,12 +34,19 @@ def generate_deepseek_comment(files):
 2. 指出可能的代码风格问题
 3. 最后用一句话总结"""
     
-    response = client.chat(
-        model="deepseek-chat",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7
+    data = {
+        "model": "deepseek-chat",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7
+    }
+    
+    response = requests.post(
+        "https://api.deepseek.com/v1/chat/completions",
+        headers=headers,
+        json=data
     )
-    return response.choices[0].message.content
+    response.raise_for_status()
+    return response.json()["choices"][0]["message"]["content"]
 
 if __name__ == "__main__":
     files = [f for f in get_weekly_commits() if f and os.path.exists(f)]
