@@ -95,8 +95,8 @@ def generate_deepseek_comment(commit_data):
         time_range=commit_data['time_range']
     )
     
-    # 限制总长度不超过30k字符
-    prompt = prompt[:30000]
+    # 限制总长度不超过50k字符
+    prompt = prompt[:50000]
     
     data = {
         "model": "deepseek-chat",
@@ -129,5 +129,5 @@ if __name__ == "__main__":
         exit()
     
     comment = generate_deepseek_comment(commit_data)
-    print(f"代码审查结果:\n{comment}")
-    update_readme(comment)
+    # print(f"代码审查结果:\n{comment}")
+    # update_readme(comment)
