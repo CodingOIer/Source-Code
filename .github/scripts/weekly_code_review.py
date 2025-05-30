@@ -26,8 +26,9 @@ def generate_deepseek_comment(files):
         "Content-Type": "application/json"
     }
     
+    file_list = '\n'.join(files)
     prompt = f"""请用幽默风趣的中文点评以下代码文件：
-{'\n'.join(files)}
+{file_list}
 
 要求：
 1. 语气像朋友间的调侃
