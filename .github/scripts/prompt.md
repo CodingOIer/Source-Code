@@ -1,13 +1,6 @@
 请用幽默风趣的中文点评以下代码修改：
 
-文件列表：
-{file_list}
-
-最近修改内容：
-{code_changes}
-
-Commit 消息：
-{commit_messages}
+{commits_details}
 
 修改时间范围：
 {time_range}
