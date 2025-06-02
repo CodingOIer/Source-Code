@@ -38,11 +38,13 @@ node *merge(node *l, node *r)
     if (l->prio < r->prio)
     {
         l->right = merge(l->right, r);
+        l->upstream();
         return l;
     }
     else
     {
         r->left = merge(l, r->left);
+        r->upstream();
         return r;
     }
 }
@@ -56,12 +58,14 @@ std::tuple<node *, node *> split(node *c, int x)
     {
         auto [l, r] = split(c->right, x);
         c->right = l;
+        c->upstream();
         return {c, r};
     }
     else
     {
         auto [l, r] = split(c->left, x);
         c->left = r;
+        c->upstream();
         return {l, c};
     }
 }
@@ -71,17 +75,19 @@ std::tuple<node *, node *> splitRank(node *c, int rk)
     {
         return {nullptr, nullptr};
     }
-    int leftSize = (c->left == nullptr ? 0 : c->size) + 1;
+    int leftSize = (c->left == nullptr ? 0 : c->left->size) + 1;
     if (leftSize <= rk)
     {
         auto [l, r] = splitRank(c->right, rk - leftSize);
         c->right = l;
+        c->upstream();
         return {c, r};
     }
     else
     {
-        auto [l, r] = split(c->left, rk);
+        auto [l, r] = splitRank(c->left, rk);
         c->left = r;
+        c->upstream();
         return {l, c};
     }
 }
